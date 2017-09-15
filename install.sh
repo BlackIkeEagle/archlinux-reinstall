@@ -18,6 +18,11 @@ read -a blockdev
 echo -n "full partitioning or leave efi alone (full|noefi|none): "
 read -a partitioning
 
+echo "select a packages list for your desktop:"
+ls *.packages
+echo -n "choose a list from above: "
+read -a packages
+
 echo -n "nvme disk or regular (nvme|regular): "
 read -a nvmedisk
 
@@ -106,7 +111,7 @@ mkdir -p /mnt/boot
 mount -o bind /mnt/mnt/efi/EFI/archlinux /mnt/boot
 
 # install packages
-pacstrap -C ./pacman.conf /mnt $(cat packages.list)
+pacstrap -C ./pacman.conf /mnt $(cat "$packages") btrfs-progs snapper snap-pac
 cp ./pacman.conf /mnt/etc/
 
 # generate fstab
