@@ -134,8 +134,5 @@ echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
 cp ./mkinitcpio.conf /mnt/etc/
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
-# set default refind_linux.conf
-cp ./refind_linux.conf /mnt/boot
-
 # set the root password
 arch-chroot /mnt passwd
