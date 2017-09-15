@@ -35,7 +35,6 @@ powerline-fonts-git
 powertop
 pygtk
 qcad
-quassel-qt-client
 s-nail
 smbclient
 strace
@@ -44,7 +43,6 @@ termite
 tig
 tigervnc
 ttf-inconsolata
-ttf-oxygen
 ttf-ubuntu-font-family
 udiskie
 unrar
