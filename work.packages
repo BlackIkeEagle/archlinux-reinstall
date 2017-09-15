@@ -76,3 +76,4 @@ virtualbox-modules-bede-lts-host
 xf86-video-intel
 xf86-video-nouveau
 zip
+jq
