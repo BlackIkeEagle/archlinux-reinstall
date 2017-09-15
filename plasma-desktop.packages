@@ -73,3 +73,6 @@ systemsettings
 user-manager
 xdg-desktop-portal-kde
 plasma5-applets-redshift-control
+gst-plugins-bad
+gst-plugins-good
+gst-plugins-ugly
