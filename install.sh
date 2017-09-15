@@ -3,6 +3,7 @@
 set -e
 
 echo "*** WARNING ****************************************************"
+echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL    *"
 echo "* MAKE SURE YOUR USB DEVICE IS MOUNTED UNDER /media/usb        *"
 echo "* OR AT LEAST MAKE SURE YOU COPY THE INFORMATION WRITTEN there *"
 echo "*** WARNING ****************************************************"
@@ -17,11 +18,6 @@ read -a blockdev
 
 echo -n "full partitioning or leave efi alone (full|noefi|none): "
 read -a partitioning
-
-echo "select a packages list for your desktop:"
-ls *.packages
-echo -n "choose a list from above: "
-read -a packages
 
 echo -n "nvme disk or regular (nvme|regular): "
 read -a nvmedisk
@@ -111,7 +107,7 @@ mkdir -p /mnt/boot
 mount -o bind /mnt/mnt/efi/EFI/archlinux /mnt/boot
 
 # install packages
-pacstrap -C ./pacman.conf /mnt $(cat "$packages") btrfs-progs snapper snap-pac
+pacstrap -C ./pacman.conf /mnt $(cat base-packages.txt) $(cat "$@")
 cp ./pacman.conf /mnt/etc/
 
 # generate fstab
