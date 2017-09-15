@@ -3,7 +3,7 @@
 set -e
 
 echo "*** WARNING ****************************************************"
-echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL    *"
+echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "* MAKE SURE YOUR USB DEVICE IS MOUNTED UNDER /media/usb        *"
 echo "* OR AT LEAST MAKE SURE YOU COPY THE INFORMATION WRITTEN there *"
 echo "*** WARNING ****************************************************"
@@ -15,6 +15,9 @@ read -a dummy
 
 echo -n "enter the block device's name: "
 read -a blockdev
+
+echo -n "efi booting or legacy (efi|legacy): "
+read -a boottype
 
 echo -n "full partitioning or leave efi alone (full|noefi|none): "
 read -a partitioning
@@ -101,10 +104,15 @@ mkdir -p /mnt/var/cache
 mount -o subvol=var/cache,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/var/cache
 mkdir -p /mnt/var/lib/docker
 mount -o subvol=var/lib/docker,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/var/lib/docker
-mkdir -p /mnt/mnt/efi
-mount /dev/${blockdev}${partitionextra}1 /mnt/mnt/efi
-mkdir -p /mnt/boot
-mount -o bind /mnt/mnt/efi/EFI/archlinux /mnt/boot
+if [[ "$boottype" == "legacy" ]]; then
+    mkdir -p /mnt/boot
+    mount /dev/${blockdev}${partitionextra}1 /mnt/boot
+else
+    mkdir -p /mnt/mnt/efi
+    mount /dev/${blockdev}${partitionextra}1 /mnt/mnt/efi
+    mkdir -p /mnt/boot
+    mount -o bind /mnt/mnt/efi/EFI/archlinux /mnt/boot
+fi
 
 # install packages
 pacstrap -C ./pacman.conf /mnt $(cat base-packages.txt) $(cat "$@")
