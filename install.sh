@@ -118,7 +118,7 @@ ln -sf /usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 
 # generate locales for en_US
-sed -e 's/#en_US/en_US/g' -i /mnt/etc/locale.gen
+sed -e 's/#en_US/en_US/g' -e 's/#nl_BE/nl_BE/g' -i /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
 
 # keyboard
