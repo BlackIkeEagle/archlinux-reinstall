@@ -60,3 +60,4 @@ wget
 which
 zsh
 rsync
+haveged

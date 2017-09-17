@@ -37,7 +37,6 @@ go
 gptfdisk
 grantlee-editor
 handbrake
-haveged
 hdparm
 htop
 hub
@@ -149,7 +148,6 @@ sni-qt
 sshfs
 strace
 subversion
-syslinux
 sysstat
 tcpdump
 the_silver_searcher
