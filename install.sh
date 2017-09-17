@@ -54,8 +54,8 @@ if [[ "$partitioning" == "full" ]]; then
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}1
 elif [[ "$partitioning" == "noefi" ]]; then
     parted --script /dev/$blockdev \
-        mkpart primary linux-swap 501MiB 4597MiB \
-        mkpart primary 4597MiB 100%
+        mkpart primary linux-swap 200MiB 4296MiB \
+        mkpart primary 4296MiB 100%
 
     badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}2
     badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}3
@@ -152,10 +152,6 @@ echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
 
 # update mkinitcpio
 cp ./mkinitcpio.conf /mnt/etc/
-arch-chroot /mnt mkinitcpio -p linux-bede || true
-
-# set the root password
-arch-chroot /mnt passwd
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
@@ -174,11 +170,19 @@ eval $(blkid -o export /dev/${blockdev}${partitionextra}3)
 sed -e "s#%%encuuid%%#$UUID#g" -i "$bootloaderfile"
 ## find usb with keyfile
 usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
-if [[ $? -eq 0 ]]; then
+if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
     eval $(blkid -o export "$usbdev")
     sed -e "s#%%keydriveuuid%%#$UUID#g" \
         -e "s#%%keydrivetype%%#$TYPE#g" \
         -i "$bootloaderfile"
+    sed -e "s#^\(MODULES=\".*\)\(\"\)#\1 vfat\2#" \
+        -i /mnt/etc/mkinitcpio.conf
 fi
 ## keyfile
 sed -e "s#%%keyfile%%#keyfile-$randstring#g" -i "$bootloaderfile"
+
+arch-chroot /mnt mkinitcpio -p linux-bede || true
+
+# set the root password
+arch-chroot /mnt passwd
+
