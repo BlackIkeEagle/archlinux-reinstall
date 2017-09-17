@@ -34,6 +34,9 @@ fi
 # create random string to append to the keyfile and hostname
 randstring="$(date +%s | sha256sum | base64 | head -c 8)"
 
+# bootloader package
+bootloaderpackage="refind-efi"
+
 # randomize data on the device
 
 if [[ "$partitioning" == "full" ]]; then
@@ -105,9 +108,11 @@ mount -o subvol=var/cache,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/
 mkdir -p /mnt/var/lib/docker
 mount -o subvol=var/lib/docker,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/var/lib/docker
 if [[ "$boottype" == "legacy" ]]; then
+    bootloaderpackage="syslinux"
     mkdir -p /mnt/boot
     mount /dev/${blockdev}${partitionextra}1 /mnt/boot
 else
+    bootloaderpackage="refind-efi"
     mkdir -p /mnt/mnt/efi
     mount /dev/${blockdev}${partitionextra}1 /mnt/mnt/efi
     mkdir -p /mnt/boot
@@ -115,7 +120,7 @@ else
 fi
 
 # install packages
-pacstrap -C ./pacman.conf /mnt $(cat base-packages.txt) $(cat "$@")
+pacstrap -C ./pacman.conf /mnt $(cat base-packages.txt) $(cat "$@") "$bootloaderpackage"
 cp ./pacman.conf /mnt/etc/
 
 # generate fstab
