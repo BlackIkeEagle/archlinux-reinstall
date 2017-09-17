@@ -163,7 +163,7 @@ if [[ "$boottype" == "efi" ]]; then
     cp refind_linux.conf /mnt/mnt/efi/EFI/linux-bede/
     bootloaderfile=/mnt/mnt/efi/EFI/linux-bede/refind_linux.conf
 else
-    arch-chroot /mnt syslinux-install_update -iam
+    arch-chroot /mnt syslinux-install_update -im
     cp syslinux.cfg /mnt/boot/syslinux/
     bootloaderfile=/mnt/boot/syslinux/syslinux.cfg
 fi
