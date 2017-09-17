@@ -141,6 +141,7 @@ sed -e 's/#en_US/en_US/g' -e 's/#nl_BE/nl_BE/g' -i /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
 
 # keyboard
+mkdir -p /mnt/etc/X11/xorg.conf.d/
 echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 cp ./00-keyboard.conf /mnt/etc/X11/xorg.conf.d/
 
