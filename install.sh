@@ -117,7 +117,16 @@ else
 fi
 
 # install packages
-pacstrap -C ./pacman.conf /mnt $(cat base-packages.txt) $(cat "$@") "$bootloaderpackage"
+if [[ ! -z $1 ]]; then
+    pacstrap -C ./pacman.conf /mnt \
+        $(cat base-packages.txt) \
+        $(cat "$@") \
+        "$bootloaderpackage"
+else
+    pacstrap -C ./pacman.conf /mnt \
+        $(cat base-packages.txt) \
+        "$bootloaderpackage"
+fi
 cp ./pacman.conf /mnt/etc/
 
 # generate fstab
