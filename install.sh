@@ -64,11 +64,13 @@ else
     badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}3
 fi
 
-# always make an arch folder in EFI
-mount /dev/${blockdev}${partitionextra}1 /mnt
-mkdir -p /mnt/EFI/archlinux
-rm -rf /mnt/EFI/archlinux/*
-umount /mnt
+if [[ "$boottype" == "efi" ]]; then
+    # always make an kernel name folder in EFI
+    mount /dev/${blockdev}${partitionextra}1 /mnt
+    mkdir -p /mnt/EFI/linux-bede
+    rm -rf /mnt/EFI/linux-bede/*
+    umount /mnt
+fi
 
 # swap
 mkswap /dev/${blockdev}${partitionextra}2
@@ -81,11 +83,6 @@ echo "$lukspassword" > /media/usb/luks-password-$randstring.txt
 echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra}3
 echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}3 /media/usb/keyfile-$randstring
 cryptsetup open /dev/${blockdev}${partitionextra}3 archlinux --key-file /media/usb/keyfile-$randstring
-
-# sample cryptsetup boot params
-####
-# cryptdevice=/dev/disk/by-uuid/6cd5d037-e4e1-4e70-a4c4-d2496265ab36:archlinux:allow-discards cryptkey=/dev/disk/by-uuid/48eb8491-f0e3-4425-b837-94e7cb5ea0c6:ext2:id_rsa rw root=/dev/mapper/archlinux
-####
 
 # "ROOT"
 mkfs.btrfs -L ROOT /dev/mapper/archlinux
@@ -100,23 +97,23 @@ btrfs subvolume list -p /mnt
 
 umount /mnt
 
-mount -o subvol=root,noatime,nodiratime,discard /dev/mapper/archlinux /mnt
+mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=root /dev/mapper/archlinux /mnt
 mkdir -p /mnt/home
-mount -o subvol=home,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/home
+mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
 mkdir -p /mnt/var/cache
-mount -o subvol=var/cache,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/var/cache
+mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
 mkdir -p /mnt/var/lib/docker
-mount -o subvol=var/lib/docker,noatime,nodiratime,discard /dev/mapper/archlinux /mnt/var/lib/docker
-if [[ "$boottype" == "legacy" ]]; then
-    bootloaderpackage="syslinux"
-    mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}1 /mnt/boot
-else
+mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
+if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="refind-efi"
     mkdir -p /mnt/mnt/efi
     mount /dev/${blockdev}${partitionextra}1 /mnt/mnt/efi
     mkdir -p /mnt/boot
-    mount -o bind /mnt/mnt/efi/EFI/archlinux /mnt/boot
+    mount -o bind /mnt/mnt/efi/EFI/linux-bede /mnt/boot
+else
+    bootloaderpackage="syslinux"
+    mkdir -p /mnt/boot
+    mount /dev/${blockdev}${partitionextra}1 /mnt/boot
 fi
 
 # install packages
@@ -149,3 +146,29 @@ arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # set the root password
 arch-chroot /mnt passwd
+
+# bootloader installation
+if [[ "$boottype" == "efi" ]]; then
+    arch-chroot /mnt refind-install
+    cp refind_linux.conf /mnt/mnt/efi/EFI/linux-bede/
+    bootloaderfile=/mnt/mnt/efi/EFI/linux-bede/refind_linux.conf
+else
+    arch-chroot /mnt syslinux-install_update -iam
+    cp syslinux.cfg /mnt/boot/syslinux/
+    bootloaderfile=/mnt/boot/syslinux/syslinux.cfg
+fi
+
+# bootloader config
+## encrypted device
+eval $(blkid -o export /dev/${blockdev}${partitionextra}3)
+sed -e "s#%%encuuid%%#$UUID#g" -i "$bootloaderfile"
+## find usb with keyfile
+usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
+if [[ $? -eq 0 ]]; then
+    eval $(blkid -o export "$usbdev")
+    sed -e "s#%%keydriveuuid%%#$UUID#g" \
+        -e "s#%%keydrivetype%%#$TYPE#g" \
+        -i "$bootloaderfile"
+fi
+## keyfile
+sed -e "s#%%keyfile%%#keyfile-$randstring#g" -i "$bootloaderfile"
