@@ -30,5 +30,6 @@ pulseaudio-alsa
 mpv
 libreoffice-fresh
 keepassxc
+sddm
 qt5-tools
 qt5-svg
