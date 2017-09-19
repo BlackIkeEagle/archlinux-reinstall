@@ -16,6 +16,8 @@ xorg-xfontsel
 xorg-xinit
 xorg-xinput
 xorg-xkill
+xorg-xdpyinfo
+xorg-xrandr
 vivaldi
 vivaldi-ffmpeg-codecs
 vivaldi-snapshot
@@ -33,3 +35,7 @@ keepassxc
 sddm
 qt5-tools
 qt5-svg
+unrar
+zip
+p7zip
+unzip
