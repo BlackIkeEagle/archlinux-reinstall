@@ -38,7 +38,6 @@ opera
 opera-developer
 opera-developer-ffmpeg-codecs
 opera-ffmpeg-codecs
-p7zip
 packer-io
 par2cmdline
 php
@@ -65,13 +64,10 @@ tree
 ttf-ubuntu-font-family
 unace
 unarj
-unrar
-unzip
 vagrant
 virtualbox
 virtualbox-modules-bede-host
 virtualbox-modules-bede-lts-host
 xf86-video-intel
 xf86-video-nouveau
-zip
 jq
