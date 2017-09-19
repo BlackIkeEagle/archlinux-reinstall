@@ -9,7 +9,7 @@ if which virtualbox > /dev/null 2>&1; then
     groups="$groups,vboxusers"
 fi
 
-useradd -D -c 'Ike Devolder' -s /usr/bin/zsh -G "$groups" ike
+useradd -U -m -c 'Ike Devolder' -s /usr/bin/zsh -G "$groups" ike
 passwd ike
 
 snapper -c root create-config /
