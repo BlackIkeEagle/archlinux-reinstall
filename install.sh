@@ -139,6 +139,7 @@ arch-chroot /mnt hwclock --systohc
 # generate locales for en_US
 sed -e 's/#en_US/en_US/g' -e 's/#nl_BE/nl_BE/g' -i /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 
 # keyboard
 mkdir -p /mnt/etc/X11/xorg.conf.d/
