@@ -12,17 +12,20 @@ fi
 useradd -U -m -c 'Ike Devolder' -s /usr/bin/zsh -G "$groups" ike
 passwd ike
 
-snapper -c root create-config /
-
 timedatectl set-ntp 1
 
 usbguard generate-policy > /etc/usbguard/rules.conf
 sed -e 's#^\(IPCAllowedUsers=\).*#\1root ike#' \
     -i /etc/usbguard/usbguard-daemon.conf
 
+# btrfs related
+if which snapper > /dev/null 2>&1; then
+    snapper -c root create-config /
+    systemctl enable snapper-cleanup.timer
+fi
+
 systemctl enable haveged.service
 systemctl enable usbguard.service
-systemctl enable snapper-cleanup.timer
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
