@@ -22,6 +22,9 @@ read -a boottype
 echo -n "full partitioning or leave efi alone (full|noefi|none): "
 read -a partitioning
 
+echo -n "main filesystem (btrfs|xfs): "
+read -a filesystem
+
 echo -n "nvme disk or regular (nvme|regular): "
 read -a nvmedisk
 
@@ -84,26 +87,35 @@ echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra
 echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}3 /media/usb/keyfile-$randstring
 cryptsetup open /dev/${blockdev}${partitionextra}3 archlinux --key-file /media/usb/keyfile-$randstring
 
-# "ROOT"
-mkfs.btrfs -L ROOT /dev/mapper/archlinux
-mount /dev/mapper/archlinux /mnt
-mkdir -p /mnt/var
-mkdir -p /mnt/var/lib
-btrfs subvolume create /mnt/root
-btrfs subvolume create /mnt/home
-btrfs subvolume create /mnt/var/cache
-btrfs subvolume create /mnt/var/lib/docker
-btrfs subvolume list -p /mnt
+if [[ "$filesystem" == "btrfs" ]]; then
+    # "ROOT"
+    mkfs.btrfs -L ROOT /dev/mapper/archlinux
+    mount /dev/mapper/archlinux /mnt
+    mkdir -p /mnt/var
+    mkdir -p /mnt/var/lib
+    btrfs subvolume create /mnt/root
+    btrfs subvolume create /mnt/home
+    btrfs subvolume create /mnt/var/cache
+    btrfs subvolume create /mnt/var/lib/docker
+    btrfs subvolume list -p /mnt
 
-umount /mnt
+    umount /mnt
 
-mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=root /dev/mapper/archlinux /mnt
-mkdir -p /mnt/home
-mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
-mkdir -p /mnt/var/cache
-mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
-mkdir -p /mnt/var/lib/docker
-mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
+    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=root /dev/mapper/archlinux /mnt
+    mkdir -p /mnt/home
+    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
+    mkdir -p /mnt/var/cache
+    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
+    mkdir -p /mnt/var/lib/docker
+    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
+elif [[ "$filesystem" == "xfs" ]]; then
+    mkfs.xfs -L ROOT /dev/mapper/archlinux
+    mount -o rw,relatime,attr2,inode64,noquota /dev/mapper/archlinux /mnt
+else
+    echo "unsupported filesystem defined"
+    exit 1
+fi
+
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="refind-efi"
     mkdir -p /mnt/mnt/efi
@@ -116,15 +128,22 @@ else
     mount /dev/${blockdev}${partitionextra}1 /mnt/boot
 fi
 
+basepackagelist=("base-packages.txt")
+if [[ "$filesystem" == "btrfs" ]]; then
+    basepackagelist+=("btrfs-packages.txt")
+elif [[ "$filesystem" == "xfs" ]]; then
+    basepackagelist+=("xfs-packages.txt")
+fi
+
 # install packages
 if [[ ! -z $1 ]]; then
     pacstrap -C ./pacman.conf /mnt \
-        $(cat base-packages.txt) \
+        $(cat ${basepackagelist[@]}) \
         $(cat "$@") \
         "$bootloaderpackage"
 else
     pacstrap -C ./pacman.conf /mnt \
-        $(cat base-packages.txt) \
+        $(cat ${basepackagelist[@]}) \
         "$bootloaderpackage"
 fi
 cp ./pacman.conf /mnt/etc/

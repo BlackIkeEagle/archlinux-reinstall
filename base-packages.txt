@@ -1,5 +1,4 @@
 bash
-btrfs-progs
 bzip2
 ca-certificates
 cifs-utils
@@ -9,7 +8,6 @@ device-mapper
 dhcpcd
 diffutils
 dosfstools
-e2fsprogs
 file
 filesystem
 findutils
@@ -45,8 +43,6 @@ psmisc
 sed
 shadow
 sudo
-snap-pac
-snapper
 sysfsutils
 systemd-sysvcompat
 tar
