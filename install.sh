@@ -110,7 +110,7 @@ if [[ "$filesystem" == "btrfs" ]]; then
     mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
 elif [[ "$filesystem" == "xfs" ]]; then
     mkfs.xfs -L ROOT /dev/mapper/archlinux
-    mount -o rw,relatime,attr2,inode64,noquota /dev/mapper/archlinux /mnt
+    mount -o rw,relatime,attr2,inode64,noquota,discard /dev/mapper/archlinux /mnt
 else
     echo "unsupported filesystem defined"
     exit 1
