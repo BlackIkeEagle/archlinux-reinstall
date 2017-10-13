@@ -101,16 +101,19 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     umount /mnt
 
-    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=root /dev/mapper/archlinux /mnt
+    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=root"
+
+    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
     mkdir -p /mnt/home
-    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
     mkdir -p /mnt/var/cache
-    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
     mkdir -p /mnt/var/lib/docker
-    mount -o rw,noatime,nodiratime,ssd,discard,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
 elif [[ "$filesystem" == "xfs" ]]; then
     mkfs.xfs -L ROOT /dev/mapper/archlinux
-    mount -o rw,relatime,attr2,inode64,noquota,discard /dev/mapper/archlinux /mnt
+    rootmountoptions="rw,relatime,attr2,inode64,noquota,discard"
+    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
 else
     echo "unsupported filesystem defined"
     exit 1
@@ -198,6 +201,8 @@ if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
     sed -e "s#^\(MODULES=\".*\)\(\"\)#\1 vfat\2#" \
         -i /mnt/etc/mkinitcpio.conf
 fi
+## root filesystem flags
+sed -e "s#%%rootflags%%#$rootmountoptions#g" -i "$bootloaderfile"
 ## keyfile
 sed -e "s#%%keyfile%%#keyfile-$randstring#g" -i "$bootloaderfile"
 
