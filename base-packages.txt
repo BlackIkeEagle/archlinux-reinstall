@@ -36,7 +36,6 @@ pacman
 parallel
 patch
 pciutils
-pcmciautils
 perl
 procps-ng
 psmisc
