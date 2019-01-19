@@ -33,6 +33,7 @@ openresolv
 openssh
 openvpn
 pacman
+pacman-contrib
 parallel
 patch
 pciutils
