@@ -31,6 +31,7 @@ man-pages
 mdadm
 networkmanager
 networkmanager-openvpn
+neovim
 openssh
 openvpn
 pacman
