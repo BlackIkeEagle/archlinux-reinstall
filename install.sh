@@ -245,7 +245,11 @@ grubcmd="${grubcmd//\//\\\/}"
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
     -i /mnt/etc/default/grub
 
-arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
+if [[ "$boottype" == "efi" ]]; then
+    arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
+else
+    arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+fi
 
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
