@@ -13,20 +13,41 @@ read -a dummy
 
 [[ ! -d /media/usb ]] && mkdir -p /media/usb
 
-echo -n "enter the block device's name: "
+echo -n "enter the block device's name (sda,nvme1): "
 read -a blockdev
 
 echo -n "efi booting or legacy (efi|legacy): "
 read -a boottype
-
-echo -n "full partitioning or leave efi alone (full|noefi|none): "
-read -a partitioning
 
 echo -n "main filesystem (btrfs|xfs): "
 read -a filesystem
 
 echo -n "nvme disk or regular (nvme|regular): "
 read -a nvmedisk
+
+echo -n "check blocks (yes|no): "
+read -a checkblocks
+
+if [[ "$blockdev" == "" ]]; then
+    echo "no blockdev given"
+    exit 1
+fi
+if [[ "$boottype" == "" ]]; then
+    echo "no boottype given"
+    exit 2
+fi
+if [[ "$filesystem" == "" ]]; then
+    echo "no filesystem given"
+    exit 4
+fi
+if [[ "$nvmedisk" == "" ]]; then
+    echo "no nvmedisk given"
+    exit 5
+fi
+if [[ "$checkblocks" == "" ]]; then
+    echo "no checkblocks given"
+    exit 6
+fi
 
 if [[ "$nvmedisk" == "nvme" ]]; then
     partitionextra="p"
@@ -40,52 +61,58 @@ randstring="$(date +%s | sha256sum | base64 | head -c 8)"
 # bootloader package
 bootloaderpackage="refind-efi"
 
-# randomize data on the device
-
-if [[ "$partitioning" == "full" ]]; then
-    badblocks -c 10240 -s -w -t random -v /dev/$blockdev
+if [[ "$boottype" == "efi" ]]; then
+    if [[ "$checkblocks" == "yes" ]]; then
+        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
+    fi
 
     parted --script /dev/$blockdev \
         mklabel gpt \
         mkpart primary fat32 0% 200MiB \
         set 1 esp on \
         set 1 legacy_boot on \
-        mkpart primary linux-swap 200MiB 4296MiB \
-        mkpart primary 4296MiB 100%
+        mkpart primary 200MiB 400MiB \
+        mkpart primary linux-swap 400MiB 4496MiB \
+        mkpart primary 4496MiB 100%
+
+    efipart=1
+    bootpart=2
+    swappart=3
+    rootpart=4
 
     # EFI Partition
-    mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}1
-elif [[ "$partitioning" == "noefi" ]]; then
+    mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
+    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
+else
+    if [[ "$checkblocks" == "yes" ]]; then
+        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
+    fi
+
     parted --script /dev/$blockdev \
+        mklabel msdos \
+        mkpart primary 0% 200MiB \
+        set 1 legacy_boot on \
         mkpart primary linux-swap 200MiB 4296MiB \
         mkpart primary 4296MiB 100%
 
-    badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}2
-    badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}3
-else
-    badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}2
-    badblocks -c 10240 -s -w -t random -v /dev/${blockdev}${partitionextra}3
-fi
+    bootpart=1
+    swappart=2
+    rootpart=3
 
-if [[ "$boottype" == "efi" ]]; then
-    # always make an kernel name folder in EFI
-    mount /dev/${blockdev}${partitionextra}1 /mnt
-    mkdir -p /mnt/EFI/linux-bede
-    rm -rf /mnt/EFI/linux-bede/*
-    umount /mnt
+    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
 
 # swap
-mkswap /dev/${blockdev}${partitionextra}2
-swapon /dev/${blockdev}${partitionextra}2
+mkswap /dev/${blockdev}${partitionextra}${swappart}
+swapon /dev/${blockdev}${partitionextra}${swappart}
 
 # encryption on "ROOT"
 dd bs=512 count=8 if=/dev/urandom of=/media/usb/keyfile-$randstring
 lukspassword="$(date +%s | sha256sum | base64 | head -c 32)"
 echo "$lukspassword" > /media/usb/luks-password-$randstring.txt
-echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra}3
-echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}3 /media/usb/keyfile-$randstring
-cryptsetup open /dev/${blockdev}${partitionextra}3 archlinux --key-file /media/usb/keyfile-$randstring
+echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra}${rootpart}
+echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}${rootpart} /media/usb/keyfile-$randstring
+cryptsetup open /dev/${blockdev}${partitionextra}${rootpart} archlinux --key-file /media/usb/keyfile-$randstring
 
 if [[ "$filesystem" == "btrfs" ]]; then
     # "ROOT"
@@ -119,16 +146,17 @@ else
     exit 1
 fi
 
+bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
-    bootloaderpackage="refind-efi"
-    mkdir -p /mnt/mnt/efi
-    mount /dev/${blockdev}${partitionextra}1 /mnt/mnt/efi
+    bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount -o bind /mnt/mnt/efi/EFI/linux-bede /mnt/boot
+    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    mkdir -p /mnt/boot/efi
+    mount /dev/${blockdev}${partitionextra}${efipart} /mnt/boot/efi
+    mkdir -p /mnt/boot/efi/EFI/archlinux
 else
-    bootloaderpackage="syslinux"
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}1 /mnt/boot
+    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
 fi
 
 basepackagelist=("base-packages.txt")
@@ -143,11 +171,11 @@ if [[ ! -z $1 ]]; then
     pacstrap -C ./pacman.conf /mnt \
         $(cat ${basepackagelist[@]}) \
         $(cat "$@") \
-        "$bootloaderpackage"
+        $bootloaderpackage
 else
     pacstrap -C ./pacman.conf /mnt \
         $(cat ${basepackagelist[@]}) \
-        "$bootloaderpackage"
+        $bootloaderpackage
 fi
 cp ./pacman.conf /mnt/etc/
 
@@ -168,7 +196,6 @@ mkdir -p /mnt/etc/X11/xorg.conf.d/
 echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 cp ./00-keyboard.conf /mnt/etc/X11/xorg.conf.d/
 
-
 # set hostname
 echo "archlinux-$randstring" > /mnt/etc/hostname
 echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
@@ -178,33 +205,44 @@ cp ./mkinitcpio.conf /mnt/etc/
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
-    arch-chroot /mnt refind-install
-    cp refind_linux.conf /mnt/mnt/efi/EFI/linux-bede/
-    bootloaderfile=/mnt/mnt/efi/EFI/linux-bede/refind_linux.conf
+    arch-chroot /mnt grub-install \
+        --target=x86_64-efi \
+        --boot-directory=/boot \
+        --efi-directory=/boot/efi \
+        --bootloader=archlinux \
+        --boot-directory=/boot/efi/EFI/archlinux \
+        --recheck
 else
-    arch-chroot /mnt syslinux-install_update -im
-    cp syslinux.cfg /mnt/boot/syslinux/
-    bootloaderfile=/mnt/boot/syslinux/syslinux.cfg
+    arch-chroot /mnt grub-install \
+        --target=i386-pc \
+        --boot-directory=/boot \
+        --recheck
 fi
 
-# bootloader config
+# bootloader extra cmd
 ## encrypted device
-eval $(blkid -o export /dev/${blockdev}${partitionextra}3)
-sed -e "s#%%encuuid%%#$UUID#g" -i "$bootloaderfile"
+eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
+grubcmd="cryptdevice=/dev/disk/by-uuid/$UUID:archlinux:allow-discards"
 ## find usb with keyfile
 usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
 if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
     eval $(blkid -o export "$usbdev")
-    sed -e "s#%%keydriveuuid%%#$UUID#g" \
-        -e "s#%%keydrivetype%%#$TYPE#g" \
-        -i "$bootloaderfile"
-    sed -e "s#^\(MODULES=\".*\)\(\"\)#\1 vfat\2#" \
+    grubcmd="$grubcmd cryptkey=/dev/disk/by-uuid/$UUID:$TYPE:keyfile-$randstring"
+    if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
+        TYPE="ext4"
+    fi
+    sed -e "s/^\(MODULES=(.*\)\()\)/\1 $TYPE\2/" \
         -i /mnt/etc/mkinitcpio.conf
 fi
 ## root filesystem flags
-sed -e "s#%%rootflags%%#$rootmountoptions#g" -i "$bootloaderfile"
-## keyfile
-sed -e "s#%%keyfile%%#keyfile-$randstring#g" -i "$bootloaderfile"
+grubcmd="$grubcmd rootflags=$rootmountoptions"
+grubcmd="${grubcmd//\//\\\/}"
+
+## add grub GRUB_CMDLINE_LINUX
+sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
+    -i /mnt/etc/default/grub
+
+arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/archlinux/grub/grub.cfg
 
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
