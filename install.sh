@@ -236,6 +236,7 @@ if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
 fi
 ## root filesystem flags
 grubcmd="$grubcmd rootflags=$rootmountoptions"
+grubcmd="${grubcmd//\//\\\/}"
 
 ## add grub GRUB_CMDLINE_LINUX
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
