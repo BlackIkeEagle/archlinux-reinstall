@@ -35,7 +35,4 @@ fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
 fi
-if which syncthing > /dev/null 2>&1; then
-    systemctl enable syncthing@ike.service
-fi
 
