@@ -219,6 +219,30 @@ else
         --recheck
 fi
 
+# bootloader extra cmd
+## encrypted device
+eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
+grubcmd="cryptdevice=/dev/disk/by-uuid/$UUID:archlinux:allow-discards"
+## find usb with keyfile
+usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
+if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
+    eval $(blkid -o export "$usbdev")
+    grubcmd="$grubcmd cryptkey=/dev/disk/by-uuid/$UUID:$TYPE:keyfile-$randstring"
+    if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
+        TYPE="ext4"
+    fi
+    sed -e "s/^\(MODULES=(.*\)\()\)/\1 $TYPE\2/" \
+        -i /mnt/etc/mkinitcpio.conf
+fi
+## root filesystem flags
+grubcmd="$grubcmd rootflags=$rootmountoptions"
+
+## add grub GRUB_CMDLINE_LINUX
+sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
+    -i /mnt/etc/default/grub
+
+arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/archlinux/grub/grub.cfg
+
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # set the root password
