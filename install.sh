@@ -91,7 +91,7 @@ else
     parted --script /dev/$blockdev \
         mklabel msdos \
         mkpart primary 0% 200MiB \
-        set 1 legacy_boot on \
+        set 1 boot on \
         mkpart primary linux-swap 200MiB 4296MiB \
         mkpart primary 4296MiB 100%
 
