@@ -218,7 +218,8 @@ else
     arch-chroot /mnt grub-install \
         --target=i386-pc \
         --boot-directory=/boot \
-        --recheck
+        --recheck \
+        /dev/${blockdev}${partitionextra}
 fi
 
 # bootloader extra cmd
