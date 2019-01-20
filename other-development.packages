@@ -3,3 +3,5 @@ dbeaver
 redis-desktop-manager
 virtualbox
 virtualbox-modules-bede-host
+docker
+docker-compose
