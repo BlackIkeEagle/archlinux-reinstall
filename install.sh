@@ -209,9 +209,9 @@ if [[ "$boottype" == "efi" ]]; then
         --target=x86_64-efi \
         --boot-directory=/boot \
         --efi-directory=/boot/efi \
-        --bootloader=archlinux \
-        --boot-directory=/boot/efi/EFI/archlinux \
+        --removable \
         --recheck
+    mkdir -p /mnt/boot/efi/EFI/BOOT/grub
 else
     arch-chroot /mnt grub-install \
         --target=i386-pc \
@@ -242,7 +242,7 @@ grubcmd="${grubcmd//\//\\\/}"
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
     -i /mnt/etc/default/grub
 
-arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/archlinux/grub/grub.cfg
+arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
 
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
