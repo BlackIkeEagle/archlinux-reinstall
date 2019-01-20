@@ -250,4 +250,4 @@ arch-chroot /mnt mkinitcpio -p linux-bede || true
 arch-chroot /mnt passwd
 
 # add post install first run script
-cp -a post-install-first-run.sh /mnt/root/
+arch-chroot /mnt /bin/bash < post-install-first-run.sh

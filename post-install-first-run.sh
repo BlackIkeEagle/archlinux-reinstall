@@ -10,7 +10,8 @@ if which virtualbox > /dev/null 2>&1; then
 fi
 
 useradd -U -m -c 'Ike Devolder' -s /usr/bin/zsh -G "$groups" ike
-passwd ike
+echo "ike:123456" | chpasswd
+chage -d 0 ike
 
 timedatectl set-ntp 1
 
@@ -34,5 +35,8 @@ if which docker > /dev/null 2>&1; then
 fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
+fi
+if which lightdm > /dev/null 2>&1; then
+    systemctl enable lightdm.service
 fi
 
