@@ -25,6 +25,7 @@ iputils
 less
 licenses
 linux-bede
+linux-firmware
 logrotate
 man-db
 man-pages
