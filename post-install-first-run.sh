@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+systemctl daemon-reload
+
 # groups
 groups="wheel"
 if which docker > /dev/null 2>&1; then
