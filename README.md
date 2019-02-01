@@ -68,7 +68,7 @@ clone the repo
 $ git clone https://github.com/BlackIkeEagle/archlinux-reinstall.git
 ```
 
-Go into the new folder and run 'a' installer
+Go into the new folder and run 'a' installer (see [installer types](#installer-types))
 
 ```
 $ cd archlinux-reinstall
