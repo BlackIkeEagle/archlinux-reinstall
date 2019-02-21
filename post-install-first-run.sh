@@ -35,6 +35,12 @@ fi
 if which docker > /dev/null 2>&1; then
     systemctl enable docker.service
 fi
+if which firewalld > /dev/null 2>&1; then
+    systemctl enable firewalld.service
+fi
+if [ -x /usr/lib/bluetooth/bluetoothd ]; then
+    systemctl enable bluetooth.service
+fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
 fi
