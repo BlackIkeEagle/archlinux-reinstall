@@ -1,3 +1,4 @@
+dconf-editor
 deepin-account-faces
 deepin-anything
 deepin-anything-module-bede
@@ -23,6 +24,9 @@ deepin-sound-theme
 deepin-system-monitor
 deepin-wallpapers
 evolution
+gvfs-mtp
+gvfs-nfs
+gvfs-smb
 kteatime
 seahorse
 startdde
