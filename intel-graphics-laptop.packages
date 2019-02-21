@@ -1,0 +1,6 @@
+intel-media-driver
+libva-intel-driver
+libva-utils
+libva-vdpau-driver
+libvdpau-va-gl
+xf86-video-intel
