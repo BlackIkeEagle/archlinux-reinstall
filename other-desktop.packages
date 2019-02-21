@@ -1,4 +1,7 @@
 copyq
-syncthing-gtk
-pavucontrol
 doublecmd-qt5
+evince
+nextcloud-client
+pavucontrol
+python-pyqt5
+syncthing-gtk

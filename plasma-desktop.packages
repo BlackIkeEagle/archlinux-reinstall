@@ -24,7 +24,6 @@ kdebugsettings
 kdecoration
 kdegraphics-mobipocket
 kdeplasma-addons
-sweeper
 kdialog
 keditbookmarks
 kfind
@@ -55,6 +54,7 @@ kwrited
 libkscreen
 libksysguard
 milou
+nextcloud-client
 okular
 oxygen
 oxygen-icons
@@ -69,10 +69,12 @@ plasma5-applets-redshift-control
 polkit-kde-agent
 powerdevil
 print-manager
+python-pyqt5
 qsyncthingtray
 sddm
 sddm-kcm
 spectacle
+sweeper
 systemsettings
 user-manager
 xdg-desktop-portal-kde
