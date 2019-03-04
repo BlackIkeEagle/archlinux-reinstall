@@ -41,6 +41,14 @@ fi
 if [ -x /usr/lib/bluetooth/bluetoothd ]; then
     systemctl enable bluetooth.service
 fi
+if which smartd > /dev/null 2>&1; then
+    systemctl enable smartd.service
+fi
+if which tlp > /dev/null 2>&1; then
+    systemctl mask systemd-rfkill.service
+    systemctl enable tlp.service
+    systemctl enable tlp-sleep.service
+fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
 fi
