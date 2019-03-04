@@ -1,4 +1,5 @@
 clementine
+ethtool
 firewalld
 keepassxc
 libreoffice-fresh
@@ -10,8 +11,11 @@ pulseaudio-alsa
 quassel-client-small
 rambox-bin
 slack-desktop
+smartmontools
 speedcrunch
 syncthing
+tlp
+tlp-rdw
 ttf-dejavu
 ttf-freefont
 ttf-hack
@@ -21,6 +25,7 @@ unzip
 usbguard-qt
 vivaldi
 vivaldi-ffmpeg-codecs
+x86_energy_perf_policy
 xclip
 xf86-input-libinput
 xorg-font-util
