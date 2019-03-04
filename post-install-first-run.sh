@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+user="ike"
+fulluser="Ike Devolder"
+
 systemctl daemon-reload
 
 # groups
@@ -11,14 +14,14 @@ if which virtualbox > /dev/null 2>&1; then
     groups="$groups,vboxusers"
 fi
 
-useradd -U -m -c 'Ike Devolder' -s /usr/bin/zsh -G "$groups" ike
-echo "ike:123456" | chpasswd
-chage -d 0 ike
+useradd -U -m -c "$fulluser" -s /usr/bin/zsh -G "$groups" $user
+echo "$user:123456" | chpasswd
+chage -d 0 $user
 
 timedatectl set-ntp 1
 
 usbguard generate-policy > /etc/usbguard/rules.conf
-sed -e 's#^\(IPCAllowedUsers=\).*#\1root ike#' \
+sed -e "s#^\(IPCAllowedUsers=\).*#\1root $user#" \
     -i /etc/usbguard/usbguard-daemon.conf
 
 # btrfs related
