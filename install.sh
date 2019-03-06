@@ -203,6 +203,12 @@ echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
 # update mkinitcpio
 cp ./mkinitcpio.conf /mnt/etc/
 
+# make sure firewalld uses iptables
+if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
+    sed -e 's/^\(FirewallBackend=\).*/\1iptables/' \
+        -i /mnt/etc/firewalld/firewalld.conf
+fi
+
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
