@@ -207,6 +207,8 @@ cp ./mkinitcpio.conf /mnt/etc/
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
     sed -e 's/^\(FirewallBackend=\).*/\1iptables/' \
         -i /mnt/etc/firewalld/firewalld.conf
+    ## copy some zones helpfull for docker and vagrant development
+    cp -a firewalld/ /mnt/etc/
 fi
 
 # bootloader installation

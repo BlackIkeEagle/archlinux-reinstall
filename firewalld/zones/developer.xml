@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Developer</short>
+  <description>Developer services.</description>
+  <interface name="vboxnet+"/>
+  <interface name="docker0"/>
+  <interface name="br-+"/>
+  <service name="xdebug"/>
+  <service name="nfs"/>
+  <service name="nfs3"/>
+  <service name="mountd"/>
+  <service name="rpc-bind"/>
+</zone>
