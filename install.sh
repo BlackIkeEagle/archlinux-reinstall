@@ -211,6 +211,9 @@ if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
     cp -a firewalld/ /mnt/etc/
 fi
 
+# sysctl extras
+cp -a sysctl.d /mnt/etc/
+
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
