@@ -5,7 +5,6 @@ breeze-gtk
 breeze-icons
 dolphin
 dolphin-plugins
-doublecmd-qt5
 drkonqi
 filelight
 gst-plugins-bad
@@ -37,7 +36,9 @@ kmenuedit
 knetattach
 kolourpaint
 konsole
+krename
 kruler
+krusader
 kscreen
 kscreenlocker
 ksshaskpass
