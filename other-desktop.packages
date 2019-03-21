@@ -4,4 +4,5 @@ evince
 nextcloud-client
 pavucontrol
 python-pyqt5
+qt5-styleplugins
 syncthing-gtk
