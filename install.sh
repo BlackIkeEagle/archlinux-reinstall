@@ -25,7 +25,7 @@ read -a filesystem
 echo -n "nvme disk or regular (nvme|regular): "
 read -a nvmedisk
 
-echo -n "check blocks (yes|no): "
+echo -n "check blocks (yes|no (default)): "
 read -a checkblocks
 
 if [[ "$blockdev" == "" ]]; then
@@ -45,8 +45,7 @@ if [[ "$nvmedisk" == "" ]]; then
     exit 5
 fi
 if [[ "$checkblocks" == "" ]]; then
-    echo "no checkblocks given"
-    exit 6
+    checkblocks="no"
 fi
 
 if [[ "$nvmedisk" == "nvme" ]]; then
