@@ -17,5 +17,6 @@ python-pyopenssl
 python-scrypt
 qcachegrind
 redis-desktop-manager
+tig
 virtualbox
 virtualbox-modules-bede-host

@@ -18,6 +18,7 @@ python-pycryptodome
 python-pyopenssl
 python-scrypt
 redis-desktop-manager
+tig
 umbrello
 virtualbox
 virtualbox-modules-bede-host
