@@ -167,16 +167,18 @@ fi
 
 # install packages
 if [[ ! -z $1 ]]; then
-    pacstrap -C ./pacman.conf /mnt \
+    pacstrap -C ./etc/pacman.conf /mnt \
         $(cat ${basepackagelist[@]}) \
         $(cat "$@") \
         $bootloaderpackage
 else
-    pacstrap -C ./pacman.conf /mnt \
+    pacstrap -C ./etc/pacman.conf /mnt \
         $(cat ${basepackagelist[@]}) \
         $bootloaderpackage
 fi
-cp ./pacman.conf /mnt/etc/
+
+# copy all etc extras
+cp -a ./etc/ /mnt/
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -191,27 +193,17 @@ arch-chroot /mnt locale-gen
 echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 
 # keyboard
-mkdir -p /mnt/etc/X11/xorg.conf.d/
 echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
-cp ./00-keyboard.conf /mnt/etc/X11/xorg.conf.d/
 
 # set hostname
 echo "archlinux-$randstring" > /mnt/etc/hostname
 echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
 
-# update mkinitcpio
-cp ./mkinitcpio.conf /mnt/etc/
-
 # make sure firewalld uses iptables
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
     sed -e 's/^\(FirewallBackend=\).*/\1iptables/' \
         -i /mnt/etc/firewalld/firewalld.conf
-    ## copy some zones helpfull for docker and vagrant development
-    cp -a firewalld/ /mnt/etc/
 fi
-
-# sysctl extras
-cp -a sysctl.d /mnt/etc/
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
