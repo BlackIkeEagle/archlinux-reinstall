@@ -71,7 +71,7 @@ if [[ "$boottype" == "efi" ]]; then
         set 1 esp on \
         set 1 legacy_boot on \
         mkpart primary 200MiB 400MiB \
-        mkpart primary linux-swap 400MiB 4496MiB \
+        mkpart primary 400MiB 4496MiB \
         mkpart primary 4496MiB 100%
 
     efipart=1
@@ -91,7 +91,7 @@ else
         mklabel msdos \
         mkpart primary 0% 200MiB \
         set 1 boot on \
-        mkpart primary linux-swap 200MiB 4296MiB \
+        mkpart primary 200MiB 4296MiB \
         mkpart primary 4296MiB 100%
 
     bootpart=1
@@ -100,10 +100,6 @@ else
 
     mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
-
-# swap
-mkswap /dev/${blockdev}${partitionextra}${swappart}
-swapon /dev/${blockdev}${partitionextra}${swappart}
 
 # encryption on "ROOT"
 dd bs=512 count=8 if=/dev/urandom of=/media/usb/keyfile-$randstring
@@ -205,6 +201,15 @@ if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
         -i /mnt/etc/firewalld/firewalld.conf
 fi
 
+# encrypted swap
+mkfs.ext2 -L cryptswap /dev/${blockdev}${partitionextra}${swappart} 1M
+
+printf "\nswap  LABEL=cryptswap  /dev/urandom  swap,offset=2048,cipher=aes-xts-plain64,size=512" \
+    >> /mnt/etc/crypttab
+
+printf "\n/dev/mapper/swap  none  swap  defaults  0  0" \
+    >> /mnt/etc/fstab
+
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
@@ -227,12 +232,13 @@ fi
 # bootloader extra cmd
 ## encrypted device
 eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
-grubcmd="cryptdevice=/dev/disk/by-uuid/$UUID:archlinux:allow-discards"
+ROOTUUID=$UUID
+grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
 ## find usb with keyfile
 usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
 if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
     eval $(blkid -o export "$usbdev")
-    grubcmd="$grubcmd cryptkey=/dev/disk/by-uuid/$UUID:$TYPE:keyfile-$randstring"
+    grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
     if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
         TYPE="ext4"
     fi
