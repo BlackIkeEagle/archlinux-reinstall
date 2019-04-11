@@ -18,6 +18,9 @@ useradd -U -m -c "$fulluser" -s /usr/bin/zsh -G "$groups" $user
 echo "$user:123456" | chpasswd
 chage -d 0 $user
 
+echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
+chmod u=rw,g=r,o= /etc/sudoers.d/$user
+
 timedatectl set-ntp 1
 
 usbguard generate-policy > /etc/usbguard/rules.conf
