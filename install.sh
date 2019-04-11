@@ -227,12 +227,13 @@ fi
 # bootloader extra cmd
 ## encrypted device
 eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
-grubcmd="cryptdevice=/dev/disk/by-uuid/$UUID:archlinux:allow-discards"
+ROOTUUID=$UUID
+grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
 ## find usb with keyfile
 usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
 if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
     eval $(blkid -o export "$usbdev")
-    grubcmd="$grubcmd cryptkey=/dev/disk/by-uuid/$UUID:$TYPE:keyfile-$randstring"
+    grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
     if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
         TYPE="ext4"
     fi
