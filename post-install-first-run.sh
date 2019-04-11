@@ -52,6 +52,7 @@ if which smartd > /dev/null 2>&1; then
 fi
 if which tlp > /dev/null 2>&1; then
     systemctl mask systemd-rfkill.service
+    systemctl mask systemd-rfkill.socket
     systemctl enable tlp.service
     systemctl enable tlp-sleep.service
 fi
