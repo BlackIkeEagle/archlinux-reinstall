@@ -1,6 +1,9 @@
 clementine
 ethtool
 firewalld
+gst-plugins-bad
+gst-plugins-good
+gst-plugins-ugly
 keepassxc
 mpv
 noto-fonts
