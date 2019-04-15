@@ -57,9 +57,6 @@ fi
 # create random string to append to the keyfile and hostname
 randstring="$(date +%s | sha256sum | base64 | head -c 8)"
 
-# bootloader package
-bootloaderpackage="refind-efi"
-
 if [[ "$boottype" == "efi" ]]; then
     if [[ "$checkblocks" == "yes" ]]; then
         badblocks -c 10240 -s -w -t random -v /dev/$blockdev
