@@ -19,7 +19,7 @@ read -a blockdev
 echo -n "efi booting or legacy (efi|legacy): "
 read -a boottype
 
-echo -n "main filesystem (btrfs|xfs): "
+echo -n "main filesystem (xfs|ext4|btrfs): "
 read -a filesystem
 
 echo -n "nvme disk or regular (nvme|regular): "
@@ -106,7 +106,10 @@ echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra
 echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}${rootpart} /media/usb/keyfile-$randstring
 cryptsetup open /dev/${blockdev}${partitionextra}${rootpart} archlinux --key-file /media/usb/keyfile-$randstring
 
+basepackagelist=("base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
+    basepackagelist+=("btrfs-packages.txt")
+
     # "ROOT"
     mkfs.btrfs -L ROOT /dev/mapper/archlinux
     mount /dev/mapper/archlinux /mnt
@@ -130,8 +133,16 @@ if [[ "$filesystem" == "btrfs" ]]; then
     mkdir -p /mnt/var/lib/docker
     mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
 elif [[ "$filesystem" == "xfs" ]]; then
+    basepackagelist+=("xfs-packages.txt")
+
     mkfs.xfs -L ROOT /dev/mapper/archlinux
-    rootmountoptions="rw,relatime,attr2,inode64,noquota,discard"
+    rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
+    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
+elif [[ "$filesystem" == "ext4" ]]; then
+    basepackagelist+=("ext4-packages.txt")
+
+    mkfs.ext4 -L ROOT /dev/mapper/archlinux
+    rootmountoptions="rw,noatime,data=ordered,discard"
     mount -o $rootmountoptions /dev/mapper/archlinux /mnt
 else
     echo "unsupported filesystem defined"
@@ -149,13 +160,6 @@ if [[ "$boottype" == "efi" ]]; then
 else
     mkdir -p /mnt/boot
     mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
-fi
-
-basepackagelist=("base-packages.txt")
-if [[ "$filesystem" == "btrfs" ]]; then
-    basepackagelist+=("btrfs-packages.txt")
-elif [[ "$filesystem" == "xfs" ]]; then
-    basepackagelist+=("xfs-packages.txt")
 fi
 
 # install packages
