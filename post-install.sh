@@ -13,8 +13,6 @@ if [[ -z $fullname ]]; then
     fullname="Ike Devolder"
 fi
 
-systemctl daemon-reload
-
 # groups
 groups="wheel"
 if which docker > /dev/null 2>&1; then
@@ -32,7 +30,7 @@ chmod u=rw,g=r,o= /etc/sudoers.d/$user
 
 timedatectl set-ntp 1
 
-usbguard generate-policy > /etc/usbguard/rules.conf
+#usbguard generate-policy > /etc/usbguard/rules.conf
 sed -e "s#^\(IPCAllowedUsers=\).*#\1root $user#" \
     -i /etc/usbguard/usbguard-daemon.conf
 
@@ -43,7 +41,7 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
-systemctl enable usbguard.service
+#systemctl enable usbguard.service
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
