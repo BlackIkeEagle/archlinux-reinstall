@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 
-user="ike"
-fulluser="Ike Devolder"
+echo -n "give your default administrator username: "
+read -a user
+
+echo -n "give your full name: "
+read -a fullname
+
+if [[ -z name ]]; then
+    name=ike
+fi
+if [[ -z $fullname ]]; then
+    fullname="Ike Devolder"
+fi
 
 systemctl daemon-reload
 
@@ -15,8 +25,7 @@ if which virtualbox > /dev/null 2>&1; then
 fi
 
 useradd -U -m -c "$fulluser" -s /usr/bin/zsh -G "$groups" $user
-echo "$user:123456" | chpasswd
-chage -d 0 $user
+passwd $user
 
 echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
 chmod u=rw,g=r,o= /etc/sudoers.d/$user
