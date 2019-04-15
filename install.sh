@@ -262,8 +262,9 @@ fi
 
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
-# set the root password
-arch-chroot /mnt passwd
+# finish the installation
+cp -a post-install.sh /mnt
+arch-chroot /mnt /post-install.sh
 
-# add post install first run script
-cp -a post-install-first-run.sh /mnt/root/
+rm /mnt/post-install.sh
+

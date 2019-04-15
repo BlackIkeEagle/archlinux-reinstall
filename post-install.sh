@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
-user="ike"
-fulluser="Ike Devolder"
+echo -n "give your default administrator username: "
+read -a user
 
-systemctl daemon-reload
+echo -n "give your full name: "
+read -a fullname
+
+if [[ -z name ]]; then
+    name=ike
+fi
+if [[ -z $fullname ]]; then
+    fullname="Ike Devolder"
+fi
 
 # groups
 groups="wheel"
@@ -15,15 +23,14 @@ if which virtualbox > /dev/null 2>&1; then
 fi
 
 useradd -U -m -c "$fulluser" -s /usr/bin/zsh -G "$groups" $user
-echo "$user:123456" | chpasswd
-chage -d 0 $user
+passwd $user
 
 echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
 chmod u=rw,g=r,o= /etc/sudoers.d/$user
 
 timedatectl set-ntp 1
 
-usbguard generate-policy > /etc/usbguard/rules.conf
+#usbguard generate-policy > /etc/usbguard/rules.conf
 sed -e "s#^\(IPCAllowedUsers=\).*#\1root $user#" \
     -i /etc/usbguard/usbguard-daemon.conf
 
@@ -34,7 +41,7 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
-systemctl enable usbguard.service
+#systemctl enable usbguard.service
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
