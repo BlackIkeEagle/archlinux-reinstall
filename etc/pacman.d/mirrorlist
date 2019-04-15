@@ -1,0 +1,6 @@
+##
+## Arch Linux repository mirrorlist
+##
+
+Server = https://mirror.pkgbuild.com/$repo/os/$arch
+Server = https://mirror.ams1.nl.leaseweb.net/archlinux/$repo/os/$arch
