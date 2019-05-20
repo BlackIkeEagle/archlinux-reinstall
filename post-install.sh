@@ -70,3 +70,48 @@ if which lightdm > /dev/null 2>&1; then
     systemctl enable lightdm.service
 fi
 
+# nvidia configuration with multiple gpu
+if which nvidia-xconfig > /dev/null 2>&1; then
+    if [[ $(lspci| grep -i '\(3D\|VGA\)' | wc -l) -gt 1 ]]; then
+        busid=$(nvidia-xconfig --query-gpu-info | grep -i 'BusID' | sed -e 's/.*\(PCI\:.*\)/\1/g')
+        cat > /etc/X11/xorg.conf.d/15-nvidia.conf <<-EOF
+Section "Module"
+    Load "modesetting"
+EndSection
+
+Section "Device"
+    Identifier     "NVIDIA Graphics"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "$busid"
+
+    Option         "ProbeAllGpus" "false"
+    Option         "NoLogo" "True"
+    Option         "UseEDID" "false"
+    #Option         "RenderAccel" "True"
+    #Option         "AddARGBGLXVisuals" "true"
+    #Option         "AllowGLXWithComposite" "true"
+    #Option         "TripleBuffer" "True"
+    #Option         "DamageEvents" "True"
+    #Option         "UseDisplayDevice" "none"
+EndSection
+EOF
+        if which sddm > /dev/null 2>&1; then
+            cat > /usr/share/sddm/scripts/Xsetup <<-EOF
+xrandr --setprovideroutputsource modesetting NVIDIA-0
+xrandr --auto
+EOF
+        fi
+        if which lightdm > /dev/null 2>&1; then
+            cat > /etc/lightdm/display_setup.sh <<-EOF
+#!/bin/sh
+xrandr --setprovideroutputsource modesetting NVIDIA-0
+xrandr --auto
+EOF
+            chmod +x /etc/lightdm/display_setup.sh
+            sed -e '/display-setup-script/ {n; :a; /display-setup-script/! {N; ba;}; s/.*display-setup-script.*/display-setup-script=\/etc\/lightdm\/display_setup.sh/; :b; n; $! bb}' \
+                -i /etc/lightdm/lightdm.conf
+        fi
+    fi
+fi
+
