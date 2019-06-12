@@ -17,6 +17,7 @@ glibc
 grep
 gzip
 haveged
+htop
 iproute2
 iptables
 iputils
