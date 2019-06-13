@@ -227,6 +227,9 @@ fi
 
 arch-chroot /mnt mkinitcpio -p linux-besrv || true
 
+rm -f /mnt/etc/resolv.conf && \
+    ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
+
 # finish the installation
 cp -a server-post-install.sh /mnt
 arch-chroot /mnt /server-post-install.sh

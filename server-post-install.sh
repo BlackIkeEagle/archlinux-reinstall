@@ -34,9 +34,8 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
-if which NetworkManager > /dev/null 2>&1; then
-    systemctl enable NetworkManager.service
-fi
+systemctl enable systemd-networkd.service
+systemctl enable systemd-resolved.service
 if which docker > /dev/null 2>&1; then
     systemctl enable docker.service
 fi
