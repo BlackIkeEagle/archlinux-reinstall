@@ -28,7 +28,6 @@ logrotate
 man-db
 man-pages
 mdadm
-networkmanager
 openssh
 pacman
 pacman-contrib
