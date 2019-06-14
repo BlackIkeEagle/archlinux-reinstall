@@ -43,5 +43,5 @@ systemd-sysvcompat
 tar
 tmux
 util-linux
-vim-cli
+vim-cli-nox
 which
