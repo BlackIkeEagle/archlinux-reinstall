@@ -36,6 +36,7 @@ fi
 systemctl enable haveged.service
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
+systemctl enable sshd.service
 if which docker > /dev/null 2>&1; then
     systemctl enable docker.service
 fi
