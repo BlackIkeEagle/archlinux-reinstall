@@ -1,3 +1,4 @@
+arc-gtk-theme
 budgie-desktop
 budgie-extras
 dconf-editor
@@ -7,6 +8,7 @@ gnome-control-center
 gnome-screensaver
 gnome-screenshot
 gnome-terminal
+gnome-tweaks
 gvfs-mtp
 gvfs-nfs
 gvfs-smb
