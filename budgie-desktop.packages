@@ -2,6 +2,8 @@ arc-gtk-theme
 budgie-desktop
 budgie-extras
 dconf-editor
+eog
+eog-plugins
 evolution
 gnome-backgrounds
 gnome-control-center
@@ -14,4 +16,5 @@ gvfs-nfs
 gvfs-smb
 kteatime
 nautilus
+papirus-icon-theme
 seahorse
