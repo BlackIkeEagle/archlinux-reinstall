@@ -4,17 +4,12 @@ budgie-extras
 dconf-editor
 eog
 eog-plugins
-evolution
 gnome-backgrounds
 gnome-control-center
 gnome-screensaver
 gnome-screenshot
 gnome-terminal
 gnome-tweaks
-gvfs-mtp
-gvfs-nfs
-gvfs-smb
-kteatime
 nautilus
 papirus-icon-theme
 seahorse
