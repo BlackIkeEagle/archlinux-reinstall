@@ -1,6 +1,11 @@
 copyq
 doublecmd-qt5
 evince
+evolution
+gvfs-mtp
+gvfs-nfs
+gvfs-smb
+kteatime
 libreoffice-fresh
 nextcloud-client
 pavucontrol
