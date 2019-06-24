@@ -10,6 +10,7 @@ gnome-screensaver
 gnome-screenshot
 gnome-terminal
 gnome-tweaks
+lightdm-gtk-greeter
 nautilus
 papirus-icon-theme
 seahorse
