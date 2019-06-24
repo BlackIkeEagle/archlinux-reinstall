@@ -12,5 +12,6 @@ gnome-terminal
 gnome-tweaks
 lightdm-gtk-greeter
 nautilus
+network-manager-applet
 papirus-icon-theme
 seahorse
