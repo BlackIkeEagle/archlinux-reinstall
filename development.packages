@@ -4,6 +4,7 @@ bind-tools
 dbeaver
 docker
 docker-compose
+flake8
 git
 htop
 python
