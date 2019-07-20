@@ -166,7 +166,7 @@ cp -a ./etc/ /mnt/
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # set timezone
-ln -sf /usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
+ln -sf /usr/share/zoneinfo/UTC /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 
 # generate locales for en_US
