@@ -1,3 +1,4 @@
+apparmor
 atop
 bash
 bzip2

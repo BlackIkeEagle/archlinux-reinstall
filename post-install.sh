@@ -42,6 +42,9 @@ fi
 
 systemctl enable haveged.service
 #systemctl enable usbguard.service
+if which aa-status > /dev/null 2>&1; then
+    systemctl enable apparmor.service
+fi
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
