@@ -1,3 +1,4 @@
+apparmor
 atop
 bash
 bzip2
@@ -30,9 +31,9 @@ logrotate
 man-db
 man-pages
 mdadm
+neovim
 networkmanager
 networkmanager-openvpn
-neovim
 openssh
 openvpn
 pacman
