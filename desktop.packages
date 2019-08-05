@@ -1,4 +1,3 @@
-clementine
 ethtool
 firewalld
 gst-plugins-bad
@@ -16,6 +15,7 @@ rambox-bin
 slack-desktop
 smartmontools
 speedcrunch
+strawberry
 syncthing
 tlp
 tlp-rdw
