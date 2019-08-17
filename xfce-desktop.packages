@@ -2,7 +2,6 @@ arc-solid-gtk-theme
 dconf-editor
 eog
 eog-plugins
-gnome-screensaver
 lightdm-gtk-greeter
 network-manager-applet
 papirus-icon-theme
@@ -13,6 +12,7 @@ thunar-volman
 xfce4-appfinder
 xfce4-panel
 xfce4-power-manager
+xfce4-screensaver
 xfce4-session
 xfce4-settings
 xfce4-terminal
