@@ -249,6 +249,7 @@ fi
 ## root filesystem flags
 grubcmd="$grubcmd rootflags=$rootmountoptions"
 grubcmd="${grubcmd//\//\\\/}"
+grubcmd="$grubcmd mem_sleep_default=deep"
 
 ## add grub GRUB_CMDLINE_LINUX
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
