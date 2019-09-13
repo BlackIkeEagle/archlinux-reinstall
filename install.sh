@@ -8,10 +8,15 @@ echo "* MAKE SURE YOUR USB DEVICE IS MOUNTED UNDER /media/usb        *"
 echo "* OR AT LEAST MAKE SURE YOU COPY THE INFORMATION WRITTEN there *"
 echo "*** WARNING ****************************************************"
 
-echo -n "did you mount your usb drive under /media/usb? "
-read -a dummy
-
 [[ ! -d /media/usb ]] && mkdir -p /media/usb
+
+echo "AVAILABLE BLOCK DEVICES"
+lsblk
+
+echo -n "enter the usb key device name (sda1,sdb1): "
+read -a usbkey
+
+mount /dev/$usbkey /media/usb
 
 echo -n "enter the block device's name (sda,nvme1): "
 read -a blockdev
