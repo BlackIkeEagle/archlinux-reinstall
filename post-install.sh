@@ -22,7 +22,7 @@ if which virtualbox > /dev/null 2>&1; then
     groups="$groups,vboxusers"
 fi
 
-useradd -U -m -c "$fulluser" -s /usr/bin/zsh -G "$groups" $user
+useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" $user
 passwd $user
 
 echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
