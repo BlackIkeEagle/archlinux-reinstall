@@ -1,15 +1,12 @@
 arandr
-blueman
 cbatticon
 dunst
 epdfview
 feh
-i3lock
-network-manager-applet
 nomacs
 playerctl
-seahorse
 simplescreenrecorder
 termite
 udiskie
-xautolock
+xss-lock
+xsecurelock

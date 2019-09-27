@@ -12,3 +12,9 @@ pavucontrol
 python-pyqt5
 qt5-styleplugins
 syncthing-gtk
+arc-solid-gtk-theme
+lightdm-gtk-greeter
+network-manager-applet
+papirus-icon-theme
+seahorse
+blueman

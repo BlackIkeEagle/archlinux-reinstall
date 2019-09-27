@@ -1,4 +1,3 @@
-arc-solid-gtk-theme
 budgie-desktop
 budgie-extras
 dconf-editor
@@ -10,8 +9,4 @@ gnome-screensaver
 gnome-screenshot
 gnome-terminal
 gnome-tweaks
-lightdm-gtk-greeter
 nautilus
-network-manager-applet
-papirus-icon-theme
-seahorse
