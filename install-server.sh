@@ -55,23 +55,36 @@ if [[ "$boottype" == "efi" ]]; then
         badblocks -c 10240 -s -w -t random -v /dev/$blockdev
     fi
 
-    parted --script /dev/$blockdev \
-        mklabel gpt \
-        mkpart ESP fat32 0% 200MiB \
-        set 1 esp on \
-        set 1 legacy_boot on \
-        mkpart primary 200MiB 400MiB \
-        mkpart primary 400MiB 4496MiB \
-        mkpart primary 4496MiB 100%
+    if [[ "$filesystem" == "btrfs" ]]; then
+        parted --script /dev/$blockdev \
+            mklabel gpt \
+            mkpart ESP fat32 0% 200MiB \
+            set 1 esp on \
+            set 1 legacy_boot on \
+            mkpart primary 200MiB 4496MiB \
+            mkpart primary 4496MiB 100%
 
-    efipart=1
-    bootpart=2
-    swappart=3
-    rootpart=4
+        efipart=1
+        swappart=2
+        rootpart=3
+    else
+        parted --script /dev/$blockdev \
+            mklabel gpt \
+            mkpart ESP fat32 0% 200MiB \
+            set 1 esp on \
+            set 1 legacy_boot on \
+            mkpart primary 200MiB 400MiB \
+            mkpart primary 400MiB 4496MiB \
+            mkpart primary 4496MiB 100%
+
+        efipart=1
+        bootpart=2
+        swappart=3
+        rootpart=4
+    fi
 
     # EFI Partition
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
-    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 else
     if [[ "$checkblocks" == "yes" ]]; then
         badblocks -c 10240 -s -w -t random -v /dev/$blockdev
@@ -87,7 +100,9 @@ else
     bootpart=1
     swappart=2
     rootpart=3
+fi
 
+if [[ ! -z $bootpart ]]; then
     mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
 
@@ -138,13 +153,17 @@ bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    if [[ ! -z $bootpart ]]; then
+        mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    fi
     mkdir -p /mnt/boot/efi
     mount /dev/${blockdev}${partitionextra}${efipart} /mnt/boot/efi
     mkdir -p /mnt/boot/efi/EFI/archlinux
 else
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    if [[ ! -z $bootpart ]]; then
+        mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    fi
 fi
 
 # use our mirrorlist, not the one from the iso

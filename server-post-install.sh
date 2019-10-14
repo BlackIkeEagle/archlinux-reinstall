@@ -19,7 +19,7 @@ if which docker > /dev/null 2>&1; then
     groups="$groups,docker"
 fi
 
-useradd -U -m -c "$fulluser" -s /bin/bash -G "$groups" $user
+useradd -U -m -c "$fullname" -s /bin/bash -G "$groups" $user
 passwd $user
 
 echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
