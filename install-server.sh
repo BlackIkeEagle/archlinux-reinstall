@@ -220,7 +220,7 @@ if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
         -i /mnt/etc/firewalld/firewalld.conf
 fi
 
-# encrypted swap
+# just swap
 mkswap -L swap /dev/${blockdev}${partitionextra}${swappart}
 
 # bootloader installation
