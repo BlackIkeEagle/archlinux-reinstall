@@ -53,11 +53,11 @@ fi
 # create random string to append to the keyfile and hostname
 randstring="$(date +%s | sha256sum | base64 | head -c 8)"
 
-if [[ "$boottype" == "efi" ]]; then
-    if [[ "$checkblocks" == "yes" ]]; then
-        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
-    fi
+if [[ "$checkblocks" == "yes" ]]; then
+    badblocks -c 10240 -s -w -t random -v /dev/$blockdev
+fi
 
+if [[ "$boottype" == "efi" ]]; then
     if [[ "$filesystem" == "btrfs" ]]; then
         parted --script /dev/$blockdev \
             mklabel gpt \
@@ -89,10 +89,6 @@ if [[ "$boottype" == "efi" ]]; then
     # EFI Partition
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
 else
-    if [[ "$checkblocks" == "yes" ]]; then
-        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
-    fi
-
     if [[ "$filesystem" == "btrfs" ]]; then
         parted --script /dev/$blockdev \
             mklabel msdos \
