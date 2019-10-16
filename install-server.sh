@@ -6,6 +6,9 @@ echo "*** WARNING ****************************************************"
 echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "*** WARNING ****************************************************"
 
+echo "AVAILABLE BLOCK DEVICES"
+lsblk
+
 echo -n "enter the block device's name (sda,nvme1): "
 read blockdev
 
