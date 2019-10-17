@@ -3,7 +3,8 @@ cbatticon
 dunst
 epdfview
 feh
-nomacs
+eog
+eog-plugins
 playerctl
 simplescreenrecorder
 termite
