@@ -132,17 +132,21 @@ if [[ "$filesystem" == "btrfs" ]]; then
     btrfs subvolume create /mnt/var/lib/docker
     btrfs subvolume list -p /mnt
 
+    # root subvol id
+    rootsubvol=$(btrfs subvolume list -p /mnt | grep '\broot\b' | sed 's/ID \([0-9]\+\).*/\1/g')
+    btrfs subvolume set-default $rootsubvol /mnt
+
     umount /mnt
 
-    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=root"
+    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo"
 
     mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
     mkdir -p /mnt/home
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
+    mount -o $rootmountoptions,subvol=home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
     mkdir -p /mnt/var/cache
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/cache
+    mount -o $rootmountoptions,subvol=var/cache /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/cache
     mkdir -p /mnt/var/lib/docker
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/lib/docker
+    mount -o $rootmountoptions,subvol=var/lib/docker /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/lib/docker
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
