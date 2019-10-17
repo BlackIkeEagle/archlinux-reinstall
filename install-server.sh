@@ -124,16 +124,15 @@ if [[ "$filesystem" == "btrfs" ]]; then
     # "ROOT"
     mkfs.btrfs -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
     mount /dev/${blockdev}${partitionextra}${rootpart} /mnt
-    mkdir -p /mnt/var
-    mkdir -p /mnt/var/lib
     btrfs subvolume create /mnt/root
-    btrfs subvolume create /mnt/home
-    btrfs subvolume create /mnt/var/cache
-    btrfs subvolume create /mnt/var/lib/docker
+    btrfs subvolume create /mnt/root/home
+    mkdir -p /mnt/root/usr
+    btrfs subvolume create /mnt/root/usr/local
+    btrfs subvolume create /mnt/root/var
     btrfs subvolume list -p /mnt
 
     # root subvol id
-    rootsubvol=$(btrfs subvolume list -p /mnt | grep '\broot\b' | sed 's/ID \([0-9]\+\).*/\1/g')
+    rootsubvol=$(btrfs subvolume list -p /mnt | grep 'root$' | sed 's/ID \([0-9]\+\).*/\1/g')
     btrfs subvolume set-default $rootsubvol /mnt
 
     umount /mnt
@@ -142,11 +141,13 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
     mkdir -p /mnt/home
-    mount -o $rootmountoptions,subvol=home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
-    mkdir -p /mnt/var/cache
-    mount -o $rootmountoptions,subvol=var/cache /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/cache
-    mkdir -p /mnt/var/lib/docker
-    mount -o $rootmountoptions,subvol=var/lib/docker /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/lib/docker
+    mount -o $rootmountoptions,subvol=root/home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
+    mkdir -p /mnt/usr/local
+    mount -o $rootmountoptions,subvol=root/usr/local /dev/${blockdev}${partitionextra}${rootpart} /mnt/usr/local
+    mkdir -p /mnt/var
+    mount -o $rootmountoptions,subvol=root/var /dev/${blockdev}${partitionextra}${rootpart} /mnt/var
+    # disable CoW on /var
+    chattr +C /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
