@@ -137,7 +137,7 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     umount /mnt
 
-    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo"
+    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=zstd"
 
     mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
     mkdir -p /mnt/home
