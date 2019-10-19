@@ -202,6 +202,7 @@ cp -a ./etc/ /mnt/
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+sed -e '/\s\+\/\s\+/d' -i /mnt/etc/fstab
 
 # set timezone
 ln -sf /usr/share/zoneinfo/UTC /mnt/etc/localtime
