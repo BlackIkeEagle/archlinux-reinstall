@@ -54,7 +54,6 @@ systemd-sysvcompat
 tar
 texinfo
 tmux
-usbguard
 usbutils
 util-linux
 vim-cli

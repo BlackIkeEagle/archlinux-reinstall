@@ -30,10 +30,6 @@ chmod u=rw,g=r,o= /etc/sudoers.d/$user
 
 timedatectl set-ntp 1
 
-#usbguard generate-policy > /etc/usbguard/rules.conf
-sed -e "s#^\(IPCAllowedUsers=\).*#\1root $user#" \
-    -i /etc/usbguard/usbguard-daemon.conf
-
 # btrfs related
 if which snapper > /dev/null 2>&1; then
     snapper -c root create-config /
@@ -41,7 +37,6 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
-#systemctl enable usbguard.service
 if which aa-status > /dev/null 2>&1; then
     systemctl enable apparmor.service
 fi
