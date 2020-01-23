@@ -69,7 +69,7 @@ if [[ "$boottype" == "efi" ]]; then
 
     parted --script /dev/$blockdev \
         mklabel gpt \
-        mkpart primary fat32 0% 200MiB \
+        mkpart ESP fat32 0% 200MiB \
         set 1 esp on \
         set 1 legacy_boot on \
         mkpart primary 200MiB 400MiB \
