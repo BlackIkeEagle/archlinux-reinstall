@@ -4,8 +4,6 @@ set -e
 
 echo "*** WARNING ****************************************************"
 echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
-echo "* MAKE SURE YOUR USB DEVICE IS MOUNTED UNDER /media/usb        *"
-echo "* OR AT LEAST MAKE SURE YOU COPY THE INFORMATION WRITTEN there *"
 echo "*** WARNING ****************************************************"
 
 [[ ! -d /media/usb ]] && mkdir -p /media/usb
@@ -13,10 +11,19 @@ echo "*** WARNING ****************************************************"
 echo "AVAILABLE BLOCK DEVICES"
 lsblk
 
-echo -n "enter the usb key device name (sda1,sdb1): "
-read -a usbkey
+echo -n "Do you want to encrypt your harddisk (yes/no): "
+read -a encrypt
 
-mount /dev/$usbkey /media/usb
+if [[ "$encrypt" != "no" ]]; then
+    encrypt="yes"
+fi
+
+if [[ "$encrypt" == "yes" ]]; then
+    echo -n "enter the usb key device name (sda1,sdb1): "
+    read -a usbkey
+
+    mount /dev/$usbkey /media/usb
+fi
 
 echo -n "enter the block device's name (sda,nvme1): "
 read -a blockdev
@@ -103,21 +110,27 @@ else
     mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
 
-# encryption on "ROOT"
-dd bs=512 count=8 if=/dev/urandom of=/media/usb/keyfile-$randstring
-lukspassword="$(date +%s | sha256sum | base64 | head -c 32)"
-echo "$lukspassword" > /media/usb/luks-password-$randstring.txt
-echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra}${rootpart}
-echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}${rootpart} /media/usb/keyfile-$randstring
-cryptsetup open /dev/${blockdev}${partitionextra}${rootpart} archlinux --key-file /media/usb/keyfile-$randstring
+if [[ "$encrypt" == "yes" ]]; then
+    # encryption on "ROOT"
+    dd bs=512 count=8 if=/dev/urandom of=/media/usb/keyfile-$randstring
+    lukspassword="$(date +%s | sha256sum | base64 | head -c 32)"
+    echo "$lukspassword" > /media/usb/luks-password-$randstring.txt
+    echo "$lukspassword" | cryptsetup -y luksFormat /dev/${blockdev}${partitionextra}${rootpart}
+    echo "$lukspassword" | cryptsetup -y luksAddKey /dev/${blockdev}${partitionextra}${rootpart} /media/usb/keyfile-$randstring
+    cryptsetup open /dev/${blockdev}${partitionextra}${rootpart} archlinux --key-file /media/usb/keyfile-$randstring
+
+    rootdev="/dev/mapper/archlinux"
+else
+    rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
+fi
 
 basepackagelist=("base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
     # "ROOT"
-    mkfs.btrfs -L ROOT /dev/mapper/archlinux
-    mount /dev/mapper/archlinux /mnt
+    mkfs.btrfs -L ROOT "$rootdev"
+    mount "$rootdev" /mnt
     mkdir -p /mnt/var
     mkdir -p /mnt/var/lib
     btrfs subvolume create /mnt/root
@@ -130,25 +143,25 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=root"
 
-    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
     mkdir -p /mnt/home
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home /dev/mapper/archlinux /mnt/home
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home "$rootdev" /mnt/home
     mkdir -p /mnt/var/cache
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache /dev/mapper/archlinux /mnt/var/cache
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache "$rootdev" /mnt/var/cache
     mkdir -p /mnt/var/lib/docker
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker /dev/mapper/archlinux /mnt/var/lib/docker
+    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker "$rootdev" /mnt/var/lib/docker
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
-    mkfs.xfs -L ROOT /dev/mapper/archlinux
+    mkfs.xfs -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
-    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
 elif [[ "$filesystem" == "ext4" ]]; then
     basepackagelist+=("ext4-packages.txt")
 
-    mkfs.ext4 -L ROOT /dev/mapper/archlinux
+    mkfs.ext4 -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,data=ordered,discard"
-    mount -o $rootmountoptions /dev/mapper/archlinux /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
 else
     echo "unsupported filesystem defined"
     exit 1
@@ -207,14 +220,22 @@ if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
         -i /mnt/etc/firewalld/firewalld.conf
 fi
 
-# encrypted swap
-mkfs.ext2 -L cryptswap /dev/${blockdev}${partitionextra}${swappart} 1M
+if [[ "$encrypt" == "yes" ]]; then
+    # encrypted swap
+    mkfs.ext2 -L cryptswap /dev/${blockdev}${partitionextra}${swappart} 1M
 
-printf "\nswap  LABEL=cryptswap  /dev/urandom  swap,offset=2048,cipher=aes-xts-plain64,size=512" \
-    >> /mnt/etc/crypttab
+    printf "\nswap  LABEL=cryptswap  /dev/urandom  swap,offset=2048,cipher=aes-xts-plain64,size=512" \
+        >> /mnt/etc/crypttab
 
-printf "\n/dev/mapper/swap  none  swap  defaults  0  0" \
-    >> /mnt/etc/fstab
+    printf "\n/dev/mapper/swap  none  swap  defaults  0  0" \
+        >> /mnt/etc/fstab
+
+else
+    mkswap -L swap /dev/${blockdev}${partitionextra}${swappart}
+
+    printf "\n/dev/${blockdev}${partitionextra}${swappart}  none  swap  defaults  0  0" \
+        >> /mnt/etc/fstab
+fi
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
@@ -236,21 +257,26 @@ else
 fi
 
 # bootloader extra cmd
-## encrypted device
-eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
+eval $(blkid -o export "$rootdev")
 ROOTUUID=$UUID
-grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
-## find usb with keyfile
-usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
-if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
-    eval $(blkid -o export "$usbdev")
-    grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
-    if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
-        TYPE="ext4"
+
+if [[ "$encrypt" == "yes" ]]; then
+    grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
+    ## find usb with keyfile
+    usbdev=$(cat /etc/mtab| grep '/media/usb' | awk '{ print $1 }')
+    if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
+        eval $(blkid -o export "$usbdev")
+        grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
+        if [[ "ext2" == $TYPE ]] || [[ "ext3" == $TYPE ]]; then
+            TYPE="ext4"
+        fi
+        sed -e "s/^\(MODULES=(.*\)\()\)/\1 $TYPE\2/" \
+            -i /mnt/etc/mkinitcpio.conf
     fi
-    sed -e "s/^\(MODULES=(.*\)\()\)/\1 $TYPE\2/" \
-        -i /mnt/etc/mkinitcpio.conf
+else
+    grubcmd="root=/dev/disk/by-uuid/$ROOTUUID"
 fi
+
 ## root filesystem flags
 grubcmd="$grubcmd rootflags=$rootmountoptions"
 grubcmd="${grubcmd//\//\\\/}"
