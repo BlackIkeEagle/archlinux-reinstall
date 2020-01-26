@@ -260,7 +260,7 @@ else
 fi
 
 # bootloader extra cmd
-eval $(blkid -o export "$rootdev")
+eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
 ROOTUUID=$UUID
 
 if [[ "$encrypt" == "yes" ]]; then
