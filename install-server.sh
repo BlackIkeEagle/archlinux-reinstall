@@ -7,19 +7,19 @@ echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "*** WARNING ****************************************************"
 
 echo -n "enter the block device's name (sda,nvme1): "
-read -a blockdev
+read blockdev
 
 echo -n "efi booting or legacy (efi|legacy): "
-read -a boottype
+read boottype
 
 echo -n "main filesystem (xfs|ext4|btrfs): "
-read -a filesystem
+read filesystem
 
 echo -n "nvme disk or regular (nvme|regular): "
-read -a nvmedisk
+read nvmedisk
 
 echo -n "check blocks (yes|no (default)): "
-read -a checkblocks
+read checkblocks
 
 if [[ "$blockdev" == "" ]]; then
     echo "no blockdev given"

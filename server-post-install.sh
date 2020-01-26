@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 echo -n "give your default administrator username: "
-read -a user
+read user
 
 echo -n "give your full name: "
-read -a fullname
+read fullname
 
 if [[ -z name ]]; then
     name=ike
