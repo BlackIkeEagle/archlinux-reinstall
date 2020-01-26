@@ -147,6 +147,9 @@ else
     mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
 fi
 
+# use our mirrorlist, not the one from the iso
+cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
+
 # install packages
 if [[ ! -z $1 ]]; then
     pacstrap -C ./etc/pacman.conf /mnt \
