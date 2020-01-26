@@ -7,6 +7,9 @@ keepassxc
 libreoffice-fresh
 mpv
 noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+noto-fonts-extra
 p7zip
 pulseaudio
 pulseaudio-alsa
@@ -21,9 +24,7 @@ syncthing
 tlp
 tlp-rdw
 ttf-dejavu
-ttf-funfonts
 ttf-hack
-ttf-linux-libertine
 unrar
 unzip
 vivaldi
