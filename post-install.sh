@@ -37,17 +37,20 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
+if which auditctl > /dev/null 2>&1; then
+    systemctl enable auditd.service
+fi
 if which aa-status > /dev/null 2>&1; then
     systemctl enable apparmor.service
+fi
+if which firewalld > /dev/null 2>&1; then
+    systemctl enable firewalld.service
 fi
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
 if which docker > /dev/null 2>&1; then
     systemctl enable docker.service
-fi
-if which firewalld > /dev/null 2>&1; then
-    systemctl enable firewalld.service
 fi
 if [ -x /usr/lib/bluetooth/bluetoothd ]; then
     systemctl enable bluetooth.service
