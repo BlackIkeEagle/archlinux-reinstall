@@ -58,59 +58,33 @@ if [[ "$checkblocks" == "yes" ]]; then
 fi
 
 if [[ "$boottype" == "efi" ]]; then
-    if [[ "$filesystem" == "btrfs" ]]; then
-        parted --script /dev/$blockdev \
-            mklabel gpt \
-            mkpart ESP fat32 0% 200MiB \
-            set 1 esp on \
-            set 1 legacy_boot on \
-            mkpart primary 200MiB 4496MiB \
-            mkpart primary 4496MiB 100%
+    parted --script /dev/$blockdev \
+        mklabel gpt \
+        mkpart ESP fat32 0% 200MiB \
+        set 1 esp on \
+        set 1 legacy_boot on \
+        mkpart primary 200MiB 400MiB \
+        mkpart primary 400MiB 4496MiB \
+        mkpart primary 4496MiB 100%
 
-        efipart=1
-        swappart=2
-        rootpart=3
-    else
-        parted --script /dev/$blockdev \
-            mklabel gpt \
-            mkpart ESP fat32 0% 200MiB \
-            set 1 esp on \
-            set 1 legacy_boot on \
-            mkpart primary 200MiB 400MiB \
-            mkpart primary 400MiB 4496MiB \
-            mkpart primary 4496MiB 100%
-
-        efipart=1
-        bootpart=2
-        swappart=3
-        rootpart=4
-    fi
+    efipart=1
+    bootpart=2
+    swappart=3
+    rootpart=4
 
     # EFI Partition
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
 else
-    if [[ "$filesystem" == "btrfs" ]]; then
-        parted --script /dev/$blockdev \
-            mklabel msdos \
-            mkpart primary 0% 4096MiB \
-            mkpart primary 4096MiB 100% \
-            set 2 boot on \
+    parted --script /dev/$blockdev \
+        mklabel msdos \
+        mkpart primary 0% 200MiB \
+        set 1 boot on \
+        mkpart primary 200MiB 4296MiB \
+        mkpart primary 4296MiB 100%
 
-        swappart=1
-        rootpart=2
-    else
-        parted --script /dev/$blockdev \
-            mklabel msdos \
-            mkpart primary 0% 200MiB \
-            set 1 boot on \
-            mkpart primary 200MiB 4296MiB \
-            mkpart primary 4296MiB 100%
-
-        bootpart=1
-        swappart=2
-        rootpart=3
-    fi
-
+    bootpart=1
+    swappart=2
+    rootpart=3
 fi
 
 if [[ ! -z $bootpart ]]; then
