@@ -2,6 +2,7 @@ arc-solid-gtk-theme
 dconf-editor
 eog
 eog-plugins
+gnome-keyring
 lightdm-gtk-greeter
 network-manager-applet
 papirus-icon-theme

@@ -6,6 +6,7 @@ eog
 eog-plugins
 gnome-backgrounds
 gnome-control-center
+gnome-keyring
 gnome-screensaver
 gnome-screenshot
 gnome-terminal
