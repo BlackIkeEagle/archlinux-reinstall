@@ -99,14 +99,36 @@ if [[ "$filesystem" == "btrfs" ]]; then
     mkfs.btrfs -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
     mount /dev/${blockdev}${partitionextra}${rootpart} /mnt
     btrfs subvolume create /mnt/root
+    btrfs subvolume create /mnt/root/.snapshots
+    mkdir /mnt/root/.snapshots/1
+    btrfs subvolume create /mnt/root/.snapshots/1/snapshot
     btrfs subvolume create /mnt/home
+    btrfs subvolume create /mnt/srv
     mkdir -p /mnt/usr
     btrfs subvolume create /mnt/usr/local
     btrfs subvolume create /mnt/var
+    # disable CoW on /var
+    chattr +C /mnt/var
+    # write first snapshot info manually
+    DATE=$(date '+%Y-%m-%d %H:%M:%S')
+    cat <<-EOF >> /mnt/root/.snapshots/1/info.xml
+<?xml version="1.0"?>
+<snapshot>
+  <type>single</type>
+  <num>1</num>
+  <date>$DATE</date>
+  <description>initial archserver</description>
+  <cleanup>number</cleanup>
+  <userdata>
+    <key>important</key>
+    <value>yes</value>
+  </userdata>
+</snapshot>
+EOF
     btrfs subvolume list -p /mnt
 
     # root subvol id
-    rootsubvol=$(btrfs subvolume list -p /mnt | grep 'root$' | sed 's/ID \([0-9]\+\).*/\1/g')
+    rootsubvol=$(btrfs subvolume list -p /mnt | grep 'root/.snapshots/1/snapshot' | sed 's/ID \([0-9]\+\).*/\1/g')
     btrfs subvolume set-default $rootsubvol /mnt
 
     umount /mnt
@@ -114,14 +136,16 @@ if [[ "$filesystem" == "btrfs" ]]; then
     rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=zstd"
 
     mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
+    mkdir -p /mnt/.snapshots
+    mount -o $rootmountoptions,subvol=root/.snapshots /dev/${blockdev}${partitionextra}${rootpart} /mnt/.snapshots
     mkdir -p /mnt/home
     mount -o $rootmountoptions,subvol=home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
+    mkdir -p /mnt/srv
+    mount -o $rootmountoptions,subvol=srv /dev/${blockdev}${partitionextra}${rootpart} /mnt/srv
     mkdir -p /mnt/usr/local
     mount -o $rootmountoptions,subvol=usr/local /dev/${blockdev}${partitionextra}${rootpart} /mnt/usr/local
     mkdir -p /mnt/var
     mount -o $rootmountoptions,subvol=var /dev/${blockdev}${partitionextra}${rootpart} /mnt/var
-    # disable CoW on /var
-    chattr +C /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
