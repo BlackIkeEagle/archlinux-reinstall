@@ -1,3 +1,3 @@
 btrfs-progs
-snap-pac
+grub-btrfs
 snapper
