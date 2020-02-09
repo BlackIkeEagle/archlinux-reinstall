@@ -95,13 +95,12 @@ basepackagelist=("server-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
+    pacman -Sy --noconfirm snapper
+
     # "ROOT"
     mkfs.btrfs -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
     mount /dev/${blockdev}${partitionextra}${rootpart} /mnt
     btrfs subvolume create /mnt/root
-    btrfs subvolume create /mnt/root/.snapshots
-    mkdir /mnt/root/.snapshots/1
-    btrfs subvolume create /mnt/root/.snapshots/1/snapshot
     btrfs subvolume create /mnt/home
     btrfs subvolume create /mnt/srv
     mkdir -p /mnt/usr
@@ -109,22 +108,16 @@ if [[ "$filesystem" == "btrfs" ]]; then
     btrfs subvolume create /mnt/var
     # disable CoW on /var
     chattr +C /mnt/var
+    umount /mnt
+
     # write first snapshot info manually
-    DATE=$(date '+%Y-%m-%d %H:%M:%S')
-    cat <<-EOF >> /mnt/root/.snapshots/1/info.xml
-<?xml version="1.0"?>
-<snapshot>
-  <type>single</type>
-  <num>1</num>
-  <date>$DATE</date>
-  <description>initial archserver</description>
-  <cleanup>number</cleanup>
-  <userdata>
-    <key>important</key>
-    <value>yes</value>
-  </userdata>
-</snapshot>
-EOF
+    mount -o subvol=root /dev/${blockdev}${partitionextra}${rootpart} /mnt
+    snapper --no-dbus -c root create-config /mnt
+    snapper create --read-write --description "initial archserver"
+    umount /mnt
+
+
+    mount /dev/${blockdev}${partitionextra}${rootpart} /mnt
     btrfs subvolume list -p /mnt
 
     # root subvol id
@@ -197,6 +190,14 @@ fi
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
+if [[ "$filesystem" == "btrfs" ]]; then
+    cp -a /etc/conf.d/snapper \
+        /mnt/etc/conf.d/snapper
+    cp -a /etc/snapper/configs/root \
+        /mnt/etc/snapper/configs/root
+    sed -e 's/\(SUBVOLUME=\).*/\1"\/"/' \
+        -i /mnt/etc/snapper/configs/root
+fi
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
