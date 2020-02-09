@@ -16,6 +16,7 @@ htop
 inetutils
 jq
 mkcert
+ncdu
 neovim
 parallel
 patch
