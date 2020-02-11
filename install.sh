@@ -90,7 +90,6 @@ if [[ "$boottype" == "efi" ]]; then
 
     # EFI Partition
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
-    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 else
     parted --script /dev/$blockdev \
         mklabel msdos \
@@ -102,7 +101,9 @@ else
     bootpart=1
     swappart=2
     rootpart=3
+fi
 
+if [[ ! -z $bootpart ]]; then
     mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
 
@@ -124,28 +125,50 @@ basepackagelist=("base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
+    pacman -Sy --noconfirm snapper
+
     # "ROOT"
     mkfs.btrfs -L ROOT "$rootdev"
     mount "$rootdev" /mnt
-    mkdir -p /mnt/var
-    mkdir -p /mnt/var/lib
     btrfs subvolume create /mnt/root
     btrfs subvolume create /mnt/home
-    btrfs subvolume create /mnt/var/cache
-    btrfs subvolume create /mnt/var/lib/docker
+    btrfs subvolume create /mnt/srv
+    mkdir -p /mnt/usr
+    btrfs subvolume create /mnt/usr/local
+    btrfs subvolume create /mnt/var
+    # disable CoW on /var
+    chattr +C /mnt/var
+    umount /mnt
+
+    # write first snapshot info manually
+    mount -o subvol=root "$rootdev" /mnt
+    snapper --no-dbus -c root create-config /mnt
+    snapper create --read-write --description "initial archserver"
+    umount /mnt
+
+
+    mount "$rootdev" /mnt
     btrfs subvolume list -p /mnt
+
+    # root subvol id
+    rootsubvol=$(btrfs subvolume list -p /mnt | grep 'root/.snapshots/1/snapshot' | sed 's/ID \([0-9]\+\).*/\1/g')
+    btrfs subvolume set-default $rootsubvol /mnt
 
     umount /mnt
 
-    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=root"
+    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=zstd"
 
     mount -o $rootmountoptions "$rootdev" /mnt
+    mkdir -p /mnt/.snapshots
+    mount -o $rootmountoptions,subvol=root/.snapshots "$rootdev" /mnt/.snapshots
     mkdir -p /mnt/home
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home "$rootdev" /mnt/home
-    mkdir -p /mnt/var/cache
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache "$rootdev" /mnt/var/cache
-    mkdir -p /mnt/var/lib/docker
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker "$rootdev" /mnt/var/lib/docker
+    mount -o $rootmountoptions,subvol=home "$rootdev" /mnt/home
+    mkdir -p /mnt/srv
+    mount -o $rootmountoptions,subvol=srv "$rootdev" /mnt/srv
+    mkdir -p /mnt/usr/local
+    mount -o $rootmountoptions,subvol=usr/local "$rootdev" /mnt/usr/local
+    mkdir -p /mnt/var
+    mount -o $rootmountoptions,subvol=var "$rootdev" /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
@@ -167,13 +190,17 @@ bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    if [[ ! -z $bootpart ]]; then
+        mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    fi
     mkdir -p /mnt/boot/efi
     mount /dev/${blockdev}${partitionextra}${efipart} /mnt/boot/efi
     mkdir -p /mnt/boot/efi/EFI/archlinux
 else
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    if [[ ! -z $bootpart ]]; then
+        mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    fi
 fi
 
 # use our mirrorlist, not the one from the iso
@@ -193,9 +220,18 @@ fi
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
+if [[ "$filesystem" == "btrfs" ]]; then
+    cp -a /etc/conf.d/snapper \
+        /mnt/etc/conf.d/snapper
+    cp -a /etc/snapper/configs/root \
+        /mnt/etc/snapper/configs/root
+    sed -e 's/\(SUBVOLUME=\).*/\1"\/"/' \
+        -i /mnt/etc/snapper/configs/root
+fi
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+sed -e '/\s\+\/\s\+/d' -i /mnt/etc/fstab
 
 # set timezone
 ln -sf /usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
@@ -212,6 +248,7 @@ echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 # set hostname
 echo "archlinux-$randstring" > /mnt/etc/hostname
 echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
+echo "::1 archlinux-$randstring" >> /mnt/etc/hosts
 
 # make sure firewalld uses iptables
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
