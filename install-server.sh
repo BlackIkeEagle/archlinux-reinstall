@@ -218,6 +218,7 @@ echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 # set hostname
 echo "archserver-$randstring" > /mnt/etc/hostname
 echo "127.0.1.1 archserver-$randstring" >> /mnt/etc/hosts
+echo "::1 archserver-$randstring" >> /mnt/etc/hosts
 
 # make sure firewalld uses iptables
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
