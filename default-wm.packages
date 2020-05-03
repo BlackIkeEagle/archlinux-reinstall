@@ -4,7 +4,7 @@ cbatticon
 dunst
 epdfview
 feh
-i3lock
+gnome-keyring
 network-manager-applet
 nomacs
 playerctl
@@ -12,4 +12,5 @@ seahorse
 simplescreenrecorder
 termite
 udiskie
-xautolock
+xsecurelock
+xss-lock
