@@ -5,9 +5,12 @@
   <interface name="vboxnet+"/>
   <interface name="docker0"/>
   <interface name="br-+"/>
-  <service name="xdebug"/>
+  <service name="mountd"/>
+  <service name="mysql"/>
   <service name="nfs"/>
   <service name="nfs3"/>
-  <service name="mountd"/>
   <service name="rpc-bind"/>
+  <service name="rpc-lockd"/>
+  <service name="xdebug"/>
+  <masquerade/>
 </zone>
