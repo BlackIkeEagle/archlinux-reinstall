@@ -60,6 +60,16 @@ if [[ "$checkblocks" == "" ]]; then
     checkblocks="no"
 fi
 
+if [[ "$filesystem" == "btrfs" ]]; then
+    echo -n "btrfs read-only root? (yes|no (default)): "
+    read btrfsroroot
+fi
+if [[ "$btrfsroroot" == "yes" ]]; then
+    btrfsroroot=yes
+else
+    btrfsroroot=no
+fi
+
 if [[ "$nvmedisk" == "nvme" ]]; then
     partitionextra="p"
 else
@@ -313,6 +323,9 @@ fi
 
 ## root filesystem flags
 grubcmd="$grubcmd rootflags=$rootmountoptions"
+if [[ "$btrfsroroot" == "yes" ]]; then
+    grubcmd="$grubcmd ro"
+fi
 grubcmd="${grubcmd//\//\\\/}"
 grubcmd="$grubcmd mem_sleep_default=deep"
 
