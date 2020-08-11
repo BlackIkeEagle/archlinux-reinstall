@@ -269,7 +269,6 @@ grubcmd="${grubcmd//\//\\\/}"
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
     -e 's/^\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1"loglevel=3"/' \
     -e 's/^\(GRUB_TERMINAL_INPUT\)/#\1/' \
-    -e 's/^\(GRUB_GFXPAYLOAD_LINUX=\)/\1text/' \
     -i /mnt/etc/default/grub
 
 if [[ "$boottype" == "efi" ]]; then
@@ -279,6 +278,8 @@ if [[ "$boottype" == "efi" ]]; then
     )
     arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
 else
+    sed -e 's/^\(GRUB_GFXPAYLOAD_LINUX=\)/\1text/' \
+        -i /mnt/etc/default/grub
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
