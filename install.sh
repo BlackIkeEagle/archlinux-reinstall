@@ -277,9 +277,7 @@ if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
         --target=x86_64-efi \
         --bootloader-id=GRUB \
-        --boot-directory=/boot \
         --efi-directory=/boot/efi \
-        --bootloader=archlinux \
         --boot-directory=/boot/efi/EFI/BOOT \
         --removable \
         --recheck
