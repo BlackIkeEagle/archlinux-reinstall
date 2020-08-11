@@ -324,6 +324,10 @@ sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
     -i /mnt/etc/default/grub
 
 if [[ "$boottype" == "efi" ]]; then
+    (
+        cd /mnt/boot
+        ln -s efi/EFI/BOOT/grub
+    )
     arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
 else
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
