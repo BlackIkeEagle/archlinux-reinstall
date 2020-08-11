@@ -84,24 +84,23 @@ if [[ "$boottype" == "efi" ]]; then
         mkpart primary 4496MiB 100%
 
     efipart=1
-    bootpart=2
-    swappart=3
-    rootpart=4
 
     # EFI Partition
     mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
 else
     parted --script /dev/$blockdev \
-        mklabel msdos \
-        mkpart primary 0% 200MiB \
-        set 1 boot on \
+        mklabel gpt \
+        mkpart non-fs 0% 2MiB \
+        set 1 bios_grub on \
+        mkpart primary 2MiB 200MiB \
+        set 2 boot on \
         mkpart primary 200MiB 4296MiB \
         mkpart primary 4296MiB 100%
-
-    bootpart=1
-    swappart=2
-    rootpart=3
 fi
+
+bootpart=2
+swappart=3
+rootpart=4
 
 if [[ ! -z $bootpart ]]; then
     mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
