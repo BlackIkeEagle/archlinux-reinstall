@@ -256,6 +256,7 @@ grubcmd="${grubcmd//\//\\\/}"
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
     -e 's/^\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1"loglevel=3"/' \
     -e 's/^\(GRUB_TERMINAL_INPUT\)/#\1/' \
+    -e 's/^\(GRUB_GFXPAYLOAD_LINUX=\)/\1text/' \
     -i /mnt/etc/default/grub
 
 if [[ "$boottype" == "efi" ]]; then
