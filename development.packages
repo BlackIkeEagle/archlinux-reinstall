@@ -11,7 +11,7 @@ docker-compose
 ethtool
 flake8
 git
-go-pie
+go
 htop
 inetutils
 jq
