@@ -27,6 +27,7 @@ ps_mem
 python
 python-dnspython
 python-ecdsa
+python-jedi
 python-jmespath
 python-neovim
 python-netaddr
