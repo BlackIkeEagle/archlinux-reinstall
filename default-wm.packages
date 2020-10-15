@@ -8,6 +8,8 @@ gnome-keyring
 network-manager-applet
 nomacs
 playerctl
+rofi
+rofimoji
 seahorse
 simplescreenrecorder
 termite
