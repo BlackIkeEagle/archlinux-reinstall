@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
 
-echo -n "give your default administrator username: "
-read user
+if [[ -n "$1" ]]; then
+    name="$1"
+    shift
+fi
 
-echo -n "give your full name: "
-read fullname
+if [[ -n "$1" ]]; then
+    fullname="$1"
+    shift
+fi
 
-if [[ -z name ]]; then
+if [[ -n "$1" ]]; then
+    password="$1"
+    shift
+fi
+
+if [[ -z "$name" ]]; then
     name=ike
 fi
-if [[ -z $fullname ]]; then
+if [[ -z "$fullname" ]]; then
     fullname="Ike Devolder"
 fi
 
@@ -22,11 +31,17 @@ if which virtualbox > /dev/null 2>&1; then
     groups="$groups,vboxusers"
 fi
 
-useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" $user
-passwd $user
+useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" $name
+if [[ -n "$password" ]]; then
+    echo "$name:$password" | chpasswd
+else
+    passwd $name
+fi
 
-echo "$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
-chmod u=rw,g=r,o= /etc/sudoers.d/$user
+echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
+echo "$name ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff" \
+    >> /etc/sudoers.d/$name
+chmod u=rw,g=r,o= /etc/sudoers.d/$name
 
 timedatectl set-ntp 1
 
@@ -37,6 +52,7 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable haveged.service
+systemctl enable sshd.service
 if which auditctl > /dev/null 2>&1; then
     systemctl enable auditd.service
 fi

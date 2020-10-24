@@ -12,7 +12,7 @@ echo "AVAILABLE BLOCK DEVICES"
 lsblk
 
 echo -n "Do you want to encrypt your harddisk (yes/no): "
-read encrypt
+read -r encrypt
 
 if [[ "$encrypt" != "no" ]]; then
     encrypt="yes"
@@ -20,25 +20,35 @@ fi
 
 if [[ "$encrypt" == "yes" ]]; then
     echo -n "enter the usb key device name (sda1,sdb1): "
-    read usbkey
+    read -r usbkey
 
     mount /dev/$usbkey /media/usb
 fi
 
 echo -n "enter the block device's name (sda,nvme1): "
-read blockdev
+read -r blockdev
 
 echo -n "efi booting or legacy (efi|legacy): "
-read boottype
+read -r boottype
 
 echo -n "main filesystem (xfs|ext4|btrfs): "
-read filesystem
+read -r filesystem
 
 echo -n "nvme disk or regular (nvme|regular): "
-read nvmedisk
+read -r nvmedisk
 
 echo -n "check blocks (yes|no (default)): "
-read checkblocks
+read -r checkblocks
+
+echo -n "give your default administrator username: "
+read -r user
+
+echo -n "give your full name: "
+read -r fullname
+
+echo -n "set your password: "
+read -r password
+
 
 if [[ "$blockdev" == "" ]]; then
     echo "no blockdev given"
@@ -300,7 +310,7 @@ arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # finish the installation
 cp -a post-install.sh /mnt
-arch-chroot /mnt /post-install.sh
+arch-chroot /mnt /post-install.sh "$user" "$fullname" "$password"
 
 rm /mnt/post-install.sh
 

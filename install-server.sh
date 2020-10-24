@@ -7,19 +7,28 @@ echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "*** WARNING ****************************************************"
 
 echo -n "enter the block device's name (sda,nvme1): "
-read blockdev
+read -r blockdev
 
 echo -n "efi booting or legacy (efi|legacy): "
-read boottype
+read -r boottype
 
 echo -n "main filesystem (xfs|ext4|btrfs): "
-read filesystem
+read -r filesystem
 
 echo -n "nvme disk or regular (nvme|regular): "
-read nvmedisk
+read -r nvmedisk
 
 echo -n "check blocks (yes|no (default)): "
-read checkblocks
+read -r checkblocks
+
+echo -n "give your default administrator username: "
+read -r user
+
+echo -n "give your full name: "
+read -r fullname
+
+echo -n "set your password: "
+read -r password
 
 if [[ "$blockdev" == "" ]]; then
     echo "no blockdev given"
@@ -236,7 +245,7 @@ rm -f /mnt/etc/resolv.conf && \
 
 # finish the installation
 cp -a server-post-install.sh /mnt
-arch-chroot /mnt /server-post-install.sh
+arch-chroot /mnt /server-post-install.sh "$user" "$fullname" "$password"
 
 rm /mnt/server-post-install.sh
 
