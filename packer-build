@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+tar -zcf archlinux-reinstall.tar.gz ./*.txt ./*.packages ./*.sh ./etc
+
+packer build packer.json
+
+rm archlinux-reinstall.tar.gz
