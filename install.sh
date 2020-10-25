@@ -194,19 +194,21 @@ fi
 cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
 # install packages
-if [[ ! -z $1 ]]; then
-    pacstrap -C ./etc/pacman.conf /mnt \
-        $(cat ${basepackagelist[@]}) \
-        $(cat "$@") \
-        $bootloaderpackage
-else
-    pacstrap -C ./etc/pacman.conf /mnt \
-        $(cat ${basepackagelist[@]}) \
-        $bootloaderpackage
-fi
+# shellcheck disable=SC2046
+pacstrap -C ./etc/pacman.conf /mnt \
+    $(cat "${basepackagelist[@]}") \
+    "$bootloaderpackage"
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
+
+# install the remaining packages (avoid gpg key issues with extra packages)
+# shellcheck disable=SC2046
+if [[ -n $1 ]]; then
+    arch-chroot /mnt \
+        pacman -Syu --noconfirm \
+        $(cat "$@")
+fi
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
