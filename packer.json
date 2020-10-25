@@ -2,12 +2,14 @@
     "variables": {
         "iso_url": "https://mirror.pkgbuild.com/iso/latest/archlinux-{{isotime \"2006.01\"}}.01-x86_64.iso",
         "iso_checksum_url": "https://mirror.pkgbuild.com/iso/latest/sha1sums.txt",
-        "disk_size": "20480",
+        "disk_size": "40960",
         "headless": "true",
         "boot_wait": "60s",
         "install_type": "",
-        "admin_user": "archlinux",
-        "admin_pass": "archlinux123!"
+        "filesystem": "xfs",
+        "disk_type": "regular",
+        "admin_user": "vagrant",
+        "admin_pass": "vagrant"
     },
     "builders": [
         {
@@ -24,23 +26,23 @@
             "ssh_username": "{{user `admin_user`}}",
             "ssh_password": "{{ user `admin_pass`}}",
             "ssh_port": 22,
-            "ssh_timeout": "2000s",
+            "ssh_timeout": "7200s",
             "shutdown_command": "sudo systemctl poweroff",
             "headless": "{{user `headless`}}",
             "http_directory": "./",
             "boot_command": [
-                "<enter><wait10><wait10><enter><enter>",
+                "<enter><wait10><wait10><wait10><wait10><enter><enter>",
                 "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/archlinux-reinstall.tar.gz'<enter><wait>",
                 "mkdir archlinux-reinstall && tar -xf archlinux-reinstall.tar.gz -C archlinux-reinstall<enter><wait>",
                 "cd archlinux-reinstall<enter><wait>",
-                "./install{{user `install_type`}}.sh && systemctl reboot<enter>no<enter>vda<enter>legacy<enter>xfs<enter>regular<enter><enter>{{user `admin_user`}}<enter>{{user `admin_user`}}<enter>{{user `admin_pass`}}<enter><wait>"
+                "./install{{user `install_type`}}.sh && systemctl reboot<enter>no<enter>vda<enter>legacy<enter>{{user `filesystem`}}<enter>{{user `disk_type`}}<enter><enter>{{user `admin_user`}}<enter>{{user `admin_user`}}<enter>{{user `admin_pass`}}<enter><wait>"
             ]
         }
     ],
     "post-processors": [
         {
             "type": "vagrant",
-            "output": "output/archlinux-{{user `install_type`}}-{{isotime \"2020.01.01\"}}-{{ .Provider }}.box"
+            "output": "output/archlinux{{user `install_type`}}-{{user `filesystem`}}-{{isotime \"2020.01.01\"}}-{{ .Provider }}.box"
         }
     ]
 }
