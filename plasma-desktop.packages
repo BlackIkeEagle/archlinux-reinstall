@@ -59,7 +59,6 @@ plasma-pa
 plasma-sdk
 plasma-workspace
 plasma-workspace-wallpapers
-plasma5-applets-redshift-control
 polkit-kde-agent
 powerdevil
 print-manager
@@ -72,5 +71,4 @@ sweeper
 systemsettings
 thunderbird
 thunderbird-extension-enigmail
-user-manager
 xdg-desktop-portal-kde
