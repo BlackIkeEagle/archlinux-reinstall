@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+for desktoptype in budgie i3 plasma xfce; do
+    for filesystem in xfs ext4 btrfs; do
+        ./packer-build \
+            -var "install_type=-$desktoptype" \
+            -var "filesystem=$filesystem"
+    done
+done
