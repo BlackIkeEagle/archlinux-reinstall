@@ -35,10 +35,21 @@ else
     passwd $name
 fi
 
-echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
-echo "$name ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff" \
-    >> /etc/sudoers.d/$name
+if [[ "$name" == "vagrant" ]]; then
+    echo "$name ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/$name
+else
+    echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
+fi
 chmod u=rw,g=r,o= /etc/sudoers.d/$name
+
+if [[ "$name" == "vagrant" ]]; then
+    mkdir -p /home/vagrant/.ssh
+    chown vagrant:vagrant /home/vagrant/.ssh
+    curl --output /home/vagrant/.ssh/authorized_keys \
+        --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
+    chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys
+    chmod 0600 /home/vagrant/.ssh/authorized_keys
+fi
 
 timedatectl set-ntp 1
 
