@@ -34,7 +34,7 @@
                 "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/archlinux-reinstall.tar.gz'<enter><wait>",
                 "mkdir archlinux-reinstall && tar -xf archlinux-reinstall.tar.gz -C archlinux-reinstall<enter><wait>",
                 "cd archlinux-reinstall<enter><wait>",
-                "./install-server.sh && systemctl reboot<enter>vda<enter>legacy<enter>{{user `filesystem`}}<enter>{{user `disk_type`}}<enter><enter>{{user `admin_user`}}<enter>{{user `admin_user`}}<enter>{{user `admin_pass`}}<enter><wait>"
+                "./install-server.sh && systemctl reboot<enter>vda<enter>legacy<enter>{{user `filesystem`}}<enter>{{user `disk_type`}}<enter><enter>{{user `admin_user`}}<enter>{{user `admin_user`}}<enter>{{user `admin_pass`}}<enter><enter><wait>"
             ]
         }
     ],
