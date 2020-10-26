@@ -46,6 +46,8 @@ fi
 chmod u=rw,g=r,o= /etc/sudoers.d/$name
 
 if [[ "$name" == "vagrant" ]]; then
+    mkdir -p /home/vagrant/.ssh
+    chown vagrant:vagrant /home/vagrant/.ssh
     curl --output /home/vagrant/.ssh/authorized_keys \
         --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
     chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys

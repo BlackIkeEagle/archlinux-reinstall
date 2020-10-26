@@ -26,7 +26,7 @@
             "ssh_username": "{{user `admin_user`}}",
             "ssh_password": "{{ user `admin_pass`}}",
             "ssh_port": 22,
-            "ssh_timeout": "7200s",
+            "ssh_timeout": "3600s",
             "shutdown_command": "sudo systemctl poweroff",
             "headless": "{{user `headless`}}",
             "http_directory": "./",
