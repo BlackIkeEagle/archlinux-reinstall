@@ -201,6 +201,8 @@ pacstrap -C ./etc/pacman.conf /mnt \
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
+cp -a ./etc-desktop/* /mnt/etc/
+chown root: -R /mnt/etc
 
 # install the remaining packages (avoid gpg key issues with extra packages)
 # shellcheck disable=SC2046

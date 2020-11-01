@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-tar -zcf archlinux-reinstall.tar.gz ./*.txt ./*.packages ./*.sh ./etc
+tar -zcf archlinux-reinstall.tar.gz ./*.txt ./*.packages ./*.sh ./etc*
 
 packer build "$@" packer.json
 

@@ -173,6 +173,8 @@ fi
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
+cp -a ./etc-server/* /mnt/etc/
+chown root: -R /mnt/etc
 
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
