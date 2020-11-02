@@ -49,6 +49,17 @@ if [[ "$name" == "vagrant" ]]; then
         --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
     chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys
     chmod 0600 /home/vagrant/.ssh/authorized_keys
+    # remove default network config
+    rm -f /etc/systemd/network/*
+    for interface in ens0 ens1 ens2 ens3 ens4 ens5; do
+        cat <<EOF >/etc/systemd/network/$interface.network
+[Match]
+Name=$interface
+
+[Network]
+DHCP=ipv4
+EOF
+    done
 fi
 
 timedatectl set-ntp 1
