@@ -6,6 +6,9 @@ echo "*** WARNING ****************************************************"
 echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "*** WARNING ****************************************************"
 
+echo "AVAILABLE BLOCK DEVICES"
+lsblk
+
 echo -n "enter the block device's name (sda,nvme1): "
 read -r blockdev
 
@@ -50,6 +53,16 @@ if [[ "$checkblocks" == "" ]]; then
     checkblocks="no"
 fi
 
+if [[ "$filesystem" == "btrfs" ]]; then
+    echo -n "btrfs read-only root? (yes|no (default)): "
+    read -r btrfsroroot
+fi
+if [[ "$btrfsroroot" == "yes" ]]; then
+    btrfsroroot=yes
+else
+    btrfsroroot=no
+fi
+
 if [[ "$nvmedisk" == "nvme" ]]; then
     partitionextra="p"
 else
@@ -59,12 +72,12 @@ fi
 # create random string to append to the keyfile and hostname
 randstring="$(date +%s | sha256sum | base64 | head -c 8)"
 
-if [[ "$boottype" == "efi" ]]; then
-    if [[ "$checkblocks" == "yes" ]]; then
-        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
-    fi
+if [[ "$checkblocks" == "yes" ]]; then
+    badblocks -c 10240 -s -w -t random -v "/dev/$blockdev"
+fi
 
-    parted --script /dev/$blockdev \
+if [[ "$boottype" == "efi" ]]; then
+    parted --script "/dev/$blockdev" \
         mklabel gpt \
         mkpart ESP fat32 0% 200MiB \
         set 1 esp on \
@@ -74,70 +87,86 @@ if [[ "$boottype" == "efi" ]]; then
         mkpart primary 4496MiB 100%
 
     efipart=1
-    bootpart=2
-    swappart=3
-    rootpart=4
 
     # EFI Partition
-    mkfs.fat -F32 -n EFI /dev/${blockdev}${partitionextra}${efipart}
-    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
+    mkfs.fat -F32 -n EFI "/dev/${blockdev}${partitionextra}${efipart}"
 else
-    if [[ "$checkblocks" == "yes" ]]; then
-        badblocks -c 10240 -s -w -t random -v /dev/$blockdev
-    fi
-
-    parted --script /dev/$blockdev \
-        mklabel msdos \
-        mkpart primary 0% 200MiB \
-        set 1 boot on \
+    parted --script "/dev/$blockdev" \
+        mklabel gpt \
+        mkpart non-fs 0% 2MiB \
+        set 1 bios_grub on \
+        mkpart primary 2MiB 200MiB \
+        set 2 boot on \
         mkpart primary 200MiB 4296MiB \
         mkpart primary 4296MiB 100%
-
-    bootpart=1
-    swappart=2
-    rootpart=3
-
-    mkfs.ext2 -L boot /dev/${blockdev}${partitionextra}${bootpart}
 fi
+
+bootpart=2
+swappart=3
+rootpart=4
+
+mkfs.ext2 -L boot "/dev/${blockdev}${partitionextra}${bootpart}"
 
 basepackagelist=("server-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
+    pacman -Sy --noconfirm snapper
+
     # "ROOT"
-    mkfs.btrfs -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
-    mount /dev/${blockdev}${partitionextra}${rootpart} /mnt
-    mkdir -p /mnt/var
-    mkdir -p /mnt/var/lib
+    mkfs.btrfs -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
+    mount "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
     btrfs subvolume create /mnt/root
     btrfs subvolume create /mnt/home
-    btrfs subvolume create /mnt/var/cache
-    btrfs subvolume create /mnt/var/lib/docker
+    btrfs subvolume create /mnt/srv
+    mkdir -p /mnt/usr
+    btrfs subvolume create /mnt/usr/local
+    btrfs subvolume create /mnt/var
+    # disable CoW on /var
+    chattr +C /mnt/var
+    umount /mnt
+
+    # write first snapshot info manually
+    mount -o subvol=root "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    snapper --no-dbus -c root create-config /mnt
+    snapper create --read-write --description "initial archserver"
+    umount /mnt
+
+
+    mount "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
     btrfs subvolume list -p /mnt
+
+    # root subvol id
+    rootsubvol=$(btrfs subvolume list -p /mnt | grep 'root/.snapshots/1/snapshot' | sed 's/ID \([0-9]\+\).*/\1/g')
+    btrfs subvolume set-default "$rootsubvol" /mnt
 
     umount /mnt
 
-    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=root"
+    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=zstd"
 
-    mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
+    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mkdir -p /mnt/.snapshots
+    mount -o $rootmountoptions,subvol=root/.snapshots "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/.snapshots
     mkdir -p /mnt/home
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=home /dev/${blockdev}${partitionextra}${rootpart} /mnt/home
-    mkdir -p /mnt/var/cache
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/cache /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/cache
-    mkdir -p /mnt/var/lib/docker
-    mount -o rw,noatime,nodiratime,ssd,space_cache,compress=lzo,subvol=var/lib/docker /dev/${blockdev}${partitionextra}${rootpart} /mnt/var/lib/docker
+    mount -o $rootmountoptions,subvol=home "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/home
+    mkdir -p /mnt/srv
+    mount -o $rootmountoptions,subvol=srv "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/srv
+    mkdir -p /mnt/usr/local
+    mount -o $rootmountoptions,subvol=usr/local "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/usr/local
+    mkdir -p /mnt/var
+    mount -o $rootmountoptions,subvol=var "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
-    mkfs.xfs -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
+    mkfs.xfs -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
     rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
-    mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
+    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
 elif [[ "$filesystem" == "ext4" ]]; then
     basepackagelist+=("ext4-packages.txt")
 
-    mkfs.ext4 -L ROOT /dev/${blockdev}${partitionextra}${rootpart}
+    mkfs.ext4 -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
     rootmountoptions="rw,noatime,data=ordered,discard"
-    mount -o $rootmountoptions /dev/${blockdev}${partitionextra}${rootpart} /mnt
+    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
 else
     echo "unsupported filesystem defined"
     exit 1
@@ -147,37 +176,49 @@ bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
     mkdir -p /mnt/boot/efi
-    mount /dev/${blockdev}${partitionextra}${efipart} /mnt/boot/efi
+    mount "/dev/${blockdev}${partitionextra}${efipart}" /mnt/boot/efi
     mkdir -p /mnt/boot/efi/EFI/archlinux
 else
     mkdir -p /mnt/boot
-    mount /dev/${blockdev}${partitionextra}${bootpart} /mnt/boot
+    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
 fi
 
 # use our mirrorlist, not the one from the iso
 cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
 # install packages
-if [[ ! -z $1 ]]; then
-    pacstrap -C ./etc/pacman.conf /mnt \
-        $(cat ${basepackagelist[@]}) \
-        $(cat "$@") \
-        $bootloaderpackage
-else
-    pacstrap -C ./etc/pacman.conf /mnt \
-        $(cat ${basepackagelist[@]}) \
-        $bootloaderpackage
-fi
+# shellcheck disable=SC2046
+pacstrap -C ./etc/pacman.conf /mnt \
+    $(cat "${basepackagelist[@]}") \
+    "$bootloaderpackage"
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
 cp -a ./etc-server/* /mnt/etc/
 chown root: -R /mnt/etc
 
+if [[ "$filesystem" == "btrfs" ]]; then
+    cp -a /etc/conf.d/snapper \
+        /mnt/etc/conf.d/snapper
+    cp -a /etc/snapper/configs/root \
+        /mnt/etc/snapper/configs/root
+    sed -e 's/\(SUBVOLUME=\).*/\1"\/"/' \
+        -i /mnt/etc/snapper/configs/root
+fi
+
+# install the remaining packages (avoid gpg key issues with extra packages)
+# shellcheck disable=SC2046
+if [[ -n $1 ]]; then
+    arch-chroot /mnt \
+        pacman -Syu --noconfirm \
+        $(cat "$@")
+fi
+
 # generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+sed -e '/\s\+\/\s\+/d' -i /mnt/etc/fstab
 
 # set timezone
 ln -sf /usr/share/zoneinfo/UTC /mnt/etc/localtime
@@ -194,6 +235,7 @@ echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 # set hostname
 echo "archserver-$randstring" > /mnt/etc/hostname
 echo "127.0.1.1 archserver-$randstring" >> /mnt/etc/hosts
+echo "::1 archserver-$randstring" >> /mnt/etc/hosts
 
 # make sure firewalld uses iptables
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
@@ -201,17 +243,15 @@ if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
         -i /mnt/etc/firewalld/firewalld.conf
 fi
 
-# encrypted swap
-mkswap -L swap /dev/${blockdev}${partitionextra}${swappart}
+# just swap
+mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
         --target=x86_64-efi \
         --bootloader-id=GRUB \
-        --boot-directory=/boot \
         --efi-directory=/boot/efi \
-        --bootloader=archlinux \
         --boot-directory=/boot/efi/EFI/BOOT \
         --removable \
         --recheck
@@ -221,22 +261,33 @@ else
         --target=i386-pc \
         --boot-directory=/boot \
         --recheck \
-        /dev/${blockdev}${partitionextra}
+        "/dev/${blockdev}${partitionextra}"
 fi
 
 # bootloader extra cmd
-eval $(blkid -o export /dev/${blockdev}${partitionextra}${rootpart})
+eval "$(blkid -o export "/dev/${blockdev}${partitionextra}${rootpart}")"
 ROOTUUID=$UUID
 grubcmd="root=/dev/disk/by-uuid/$ROOTUUID rootflags=$rootmountoptions"
+if [[ "$btrfsroroot" == "yes" ]]; then
+    grubcmd="$grubcmd ro"
+fi
 grubcmd="${grubcmd//\//\\\/}"
 
 ## add grub GRUB_CMDLINE_LINUX
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
+    -e 's/^\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1"loglevel=3"/' \
+    -e 's/^\(GRUB_TERMINAL_INPUT\)/#\1/' \
     -i /mnt/etc/default/grub
 
 if [[ "$boottype" == "efi" ]]; then
+    (
+        cd /mnt/boot
+        ln -s efi/EFI/BOOT/grub .
+    )
     arch-chroot /mnt grub-mkconfig -o /boot/efi/EFI/BOOT/grub/grub.cfg
 else
+    sed -e 's/^\(GRUB_GFXPAYLOAD_LINUX=\)/\1text/' \
+        -i /mnt/etc/default/grub
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
