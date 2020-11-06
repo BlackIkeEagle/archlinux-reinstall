@@ -12,6 +12,7 @@ gnome-screenshot
 gnome-terminal
 gnome-tweaks
 lightdm-gtk-greeter
+mutter
 nautilus
 network-manager-applet
 papirus-icon-theme
