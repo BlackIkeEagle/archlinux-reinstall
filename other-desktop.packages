@@ -1,6 +1,7 @@
 arc-solid-gtk-theme
 blueman
 copyq
+dconf-editor
 doublecmd-qt5
 evince
 evolution
@@ -8,12 +9,10 @@ gvfs-mtp
 gvfs-nfs
 gvfs-smb
 lightdm-gtk-greeter
-lxappearance
 network-manager-applet
 nextcloud-client
 papirus-icon-theme
 pavucontrol
 python-pyqt5
-qt5-styleplugins
 seahorse
 syncthing-gtk
