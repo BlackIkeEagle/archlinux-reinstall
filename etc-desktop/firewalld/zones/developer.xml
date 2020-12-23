@@ -3,7 +3,7 @@
   <short>Developer</short>
   <description>Developer services.</description>
   <interface name="vboxnet+"/>
-  <interface name="docker0"/>
+  <interface name="docker+"/>
   <interface name="br-+"/>
   <service name="mountd"/>
   <service name="mysql"/>
