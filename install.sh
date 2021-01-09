@@ -265,8 +265,8 @@ echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 
 # set hostname
 echo "archlinux-$randstring" > /mnt/etc/hostname
-echo "127.0.1.1 archlinux-$randstring" >> /mnt/etc/hosts
-echo "::1 archlinux-$randstring" >> /mnt/etc/hosts
+echo "127.0.0.1 localhost archlinux-$randstring" >> /mnt/etc/hosts
+echo "::1 localhost archlinux-$randstring" >> /mnt/etc/hosts
 
 # make sure firewalld uses iptables
 if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
@@ -319,6 +319,7 @@ if [[ "$encrypt" == "yes" ]]; then
     grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
     ## find usb with keyfile
     usbdev=$(grep '/media/usb' /etc/mtab | awk '{ print $1 }')
+    # shellcheck disable=SC2181
     if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
         eval "$(blkid -o export "$usbdev")"
         grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
