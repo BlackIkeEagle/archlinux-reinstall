@@ -9,9 +9,8 @@ noto-fonts-cjk
 noto-fonts-emoji
 noto-fonts-extra
 p7zip
-pulseaudio
-pulseaudio-alsa
-pulseaudio-bluetooth
+pipewire-alsa
+pipewire-pulse
 quassel-client-small
 rambox-bin
 slack-desktop
