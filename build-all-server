@@ -3,6 +3,6 @@
 set -eo pipefail
 
 for filesystem in xfs ext4 btrfs; do
-    ./packer-server-build \
+    ./packer-build-server \
         -var "filesystem=$filesystem"
 done
