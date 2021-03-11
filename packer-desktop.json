@@ -5,7 +5,7 @@
         "install_mirror": "https://mirror.pkgbuild.com/$repo/os/$arch",
         "disk_size": "40960",
         "headless": "true",
-        "boot_wait": "60s",
+        "boot_wait": "40s",
         "install_type": "",
         "filesystem": "xfs",
         "disk_type": "regular",
@@ -26,7 +26,7 @@
             "net_device": "virtio-net",
             "headless": "{{user `headless`}}",
             "http_directory": "./",
-            "boot_wait": "50s",
+            "boot_wait": "{{user `boot_wait`}}",
             "boot_command": [
                 "<enter><enter>",
                 "systemctl stop sshd.service<enter><wait>",
