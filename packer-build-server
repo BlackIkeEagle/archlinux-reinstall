@@ -4,6 +4,8 @@ set -eo pipefail
 
 tar -zcf archlinux-reinstall.tar.gz ./*.txt ./*.packages ./*.sh ./etc*
 
+echo "packer-build-server $*"
+
 packer build "$@" packer-server.json
 
 rm archlinux-reinstall.tar.gz

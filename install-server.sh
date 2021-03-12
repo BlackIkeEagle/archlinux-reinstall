@@ -297,8 +297,8 @@ rm -f /mnt/etc/resolv.conf && \
     ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
 
 # finish the installation
-cp -a server-post-install.sh /mnt
-arch-chroot /mnt /server-post-install.sh "$user" "$fullname" "$password"
+cp -a post-install-server.sh /mnt
+arch-chroot /mnt /post-install-server.sh "$user" "$fullname" "$password"
 
-rm /mnt/server-post-install.sh
+rm /mnt/post-install-server.sh
 

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+./build-all-desktop "$@"
+./build-all-server "$@"

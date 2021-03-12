@@ -361,8 +361,8 @@ fi
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # finish the installation
-cp -a post-install.sh /mnt
-arch-chroot /mnt /post-install.sh "$user" "$fullname" "$password"
+cp -a post-install-desktop.sh /mnt
+arch-chroot /mnt /post-install-desktop.sh "$user" "$fullname" "$password"
 
-rm /mnt/post-install.sh
+rm /mnt/post-install-desktop.sh
 
