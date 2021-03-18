@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" ]]; then
+    echo "give a box"
+    exit 1
+fi
+
+box=$(basename "$1")
+boxname=${box//_*}
+
+vagrant box add \
+    --name "$boxname" \
+    "$1"

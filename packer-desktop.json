@@ -46,7 +46,7 @@
     "post-processors": [
         {
             "type": "vagrant",
-            "output": "output/archlinux{{user `install_type`}}-{{user `filesystem`}}-{{isotime \"2006.01.02\"}}-{{ .Provider }}.box"
+            "output": "output/archlinux{{user `install_type`}}-{{user `filesystem`}}_{{isotime \"2006.01.02\"}}-{{ .Provider }}.box"
         }
     ]
 }
