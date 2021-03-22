@@ -8,7 +8,6 @@ device-mapper
 dosfstools
 firewalld
 fwupd
-haveged
 less
 linux-bede
 linux-firmware

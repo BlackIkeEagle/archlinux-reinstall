@@ -6,7 +6,6 @@ curl
 device-mapper
 dhcpcd
 firewalld
-haveged
 htop
 iptables
 less

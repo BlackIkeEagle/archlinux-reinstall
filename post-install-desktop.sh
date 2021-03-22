@@ -62,7 +62,6 @@ if which snapper > /dev/null 2>&1; then
     systemctl enable snapper-cleanup.timer
 fi
 
-systemctl enable haveged.service
 systemctl enable sshd.service
 if which auditctl > /dev/null 2>&1; then
     systemctl enable auditd.service
