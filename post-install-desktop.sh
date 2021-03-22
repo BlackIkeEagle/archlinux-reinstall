@@ -93,7 +93,7 @@ fi
 
 # nvidia configuration with multiple gpu
 if which nvidia-xconfig > /dev/null 2>&1; then
-    if [[ $(lspci| grep -i '\(3D\|VGA\)' | wc -l) -gt 1 ]]; then
+    if [[ $(lspci| grep -ci '\(3D\|VGA\)') -gt 1 ]]; then
         busid=$(nvidia-xconfig --query-gpu-info | grep -i 'BusID' | sed -e 's/.*\(PCI\:.*\)/\1/g')
         cat > /etc/X11/xorg.conf.d/15-nvidia.conf <<-EOF
 Section "Module"
