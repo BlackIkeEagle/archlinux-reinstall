@@ -11,7 +11,7 @@ noto-fonts-extra
 p7zip
 pipewire-alsa
 pipewire-pulse
-quassel-client-small
+quassel-client-qt
 rambox-bin
 slack-desktop
 smartmontools
