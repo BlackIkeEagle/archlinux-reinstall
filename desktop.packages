@@ -17,8 +17,8 @@ slack-desktop
 smartmontools
 speedcrunch
 strawberry
-syncthing
-syncthing-gtk
+syncthing-bin
+syncthingtray
 ttf-dejavu
 ttf-hack
 unrar
