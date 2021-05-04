@@ -3,6 +3,7 @@ ansible-lint
 atop
 bind-tools
 buildah
+crictl
 dbeaver
 devtools
 diffutils
@@ -12,9 +13,14 @@ ethtool
 flake8
 git
 go
+helm
 htop
 inetutils
 jq
+k9s
+kube-linter
+kubectl
+kubectx
 mkcert
 ncdu
 neovim
