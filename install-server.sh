@@ -237,12 +237,6 @@ echo "archserver-$randstring" > /mnt/etc/hostname
 echo "127.0.0.1 localhost archserver-$randstring" >> /mnt/etc/hosts
 echo "::1 localhost archserver-$randstring" >> /mnt/etc/hosts
 
-# make sure firewalld uses iptables
-if [[ -e /mnt/etc/firewalld/firewalld.conf ]]; then
-    sed -e 's/^\(FirewallBackend=\).*/\1iptables/' \
-        -i /mnt/etc/firewalld/firewalld.conf
-fi
-
 # just swap
 mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 

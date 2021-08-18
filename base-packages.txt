@@ -1,5 +1,5 @@
-base
 apparmor
+base
 ca-certificates
 cifs-utils
 cryptsetup
@@ -8,6 +8,7 @@ device-mapper
 dosfstools
 firewalld
 fwupd
+iptables-nft
 less
 linux-bede
 linux-firmware

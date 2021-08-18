@@ -7,7 +7,7 @@ device-mapper
 dhcpcd
 firewalld
 htop
-iptables
+iptables-nft
 less
 linux-besrv
 logrotate
