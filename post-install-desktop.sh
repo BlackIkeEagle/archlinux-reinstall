@@ -31,12 +31,18 @@ if which virtualbox > /dev/null 2>&1; then
     groups="$groups,vboxusers"
 fi
 
-useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" $name
+useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" "$name"
 if [[ -n "$password" ]]; then
     echo "$name:$password" | chpasswd
 else
     passwd $name
 fi
+
+# subuid / subgid
+touch /etc/subuid
+touch /etc/subgid
+usermod --add-subuids 100000-165535 "$name"
+usermod --add-subgids 100000-165535 "$name"
 
 if [[ "$name" == "vagrant" ]]; then
     echo "$name ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/$name
