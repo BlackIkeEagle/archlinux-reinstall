@@ -69,6 +69,7 @@ if which snapper > /dev/null 2>&1; then
 fi
 
 systemctl enable sshd.service
+systemctl enable systemd-oomd.service
 if which auditctl > /dev/null 2>&1; then
     systemctl enable auditd.service
 fi
