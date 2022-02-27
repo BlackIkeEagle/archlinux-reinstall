@@ -3,6 +3,7 @@ bluedevil
 breeze
 breeze-gtk
 breeze-icons
+discover
 dolphin
 dolphin-plugins
 drkonqi
@@ -58,6 +59,7 @@ plasma-integration
 plasma-nm
 plasma-pa
 plasma-sdk
+plasma-wayland-session
 plasma-workspace
 plasma-workspace-wallpapers
 polkit-kde-agent
