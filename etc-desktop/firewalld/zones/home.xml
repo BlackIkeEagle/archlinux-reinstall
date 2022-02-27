@@ -5,5 +5,4 @@
   <service name="ssh"/>
   <service name="dhcpv6-client"/>
   <service name="kdeconnect"/>
-  <service name="syncthing"/>
 </zone>
