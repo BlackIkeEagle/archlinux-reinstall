@@ -142,7 +142,7 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     umount /mnt
 
-    rootmountoptions="rw,noatime,nodiratime,ssd,space_cache,compress=zstd"
+    rootmountoptions="rw,noatime,nodiratime,discard=async,compress=zstd"
 
     mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
     mkdir -p /mnt/.snapshots
