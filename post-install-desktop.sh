@@ -79,6 +79,9 @@ fi
 if which firewalld > /dev/null 2>&1; then
     systemctl enable firewalld.service
 fi
+if which thermald > /dev/null 2>&1; then
+    systemctl enable thermald.service
+fi
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
 fi
