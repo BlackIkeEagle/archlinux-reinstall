@@ -7,8 +7,6 @@ crictl
 dbeaver
 devtools
 diffutils
-docker
-docker-compose
 ethtool
 flake8
 git
@@ -27,8 +25,14 @@ neovim
 parallel
 patch
 perl
-php
+php74
+php74-xdebug
+php80
+php80-xdebug
+php81
+php81-xdebug
 podman
+podman-compose
 ps_mem
 python
 python-dnspython
@@ -42,7 +46,6 @@ python-pycryptodome
 python-pyopenssl
 python-scrypt
 qcachegrind
-redis-desktop-manager
 rsync
 shellcheck
 the_silver_searcher
