@@ -1,3 +1,2 @@
 btrfs-progs
-grub-btrfs
 snapper
