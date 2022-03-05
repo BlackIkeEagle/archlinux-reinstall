@@ -1,5 +1,6 @@
 apparmor
 base
+blackikeeagle-system-update
 ca-certificates
 cifs-utils
 cryptsetup
@@ -20,7 +21,6 @@ networkmanager
 networkmanager-openvpn
 openssh
 openvpn
-pacman-contrib
 procps-ng
 sudo
 sysfsutils

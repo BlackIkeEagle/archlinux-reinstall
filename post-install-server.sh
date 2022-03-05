@@ -88,3 +88,7 @@ fi
 if which firewalld > /dev/null 2>&1; then
     systemctl enable firewalld.service
 fi
+if which run-system-update > /dev/null 2>&1; then
+    systemctl enable download-updates.timer
+    systemctl enable cleanup-pacman-cache.timer
+fi

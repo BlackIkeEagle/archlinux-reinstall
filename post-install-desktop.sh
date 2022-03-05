@@ -104,6 +104,10 @@ fi
 if which smartd > /dev/null 2>&1; then
     systemctl enable smartd.service
 fi
+if which run-system-update > /dev/null 2>&1; then
+    systemctl enable download-updates.timer
+    systemctl enable cleanup-pacman-cache.timer
+fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
 fi

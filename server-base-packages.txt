@@ -1,6 +1,7 @@
-base
 apparmor
 atop
+base
+blackikeeagle-system-update
 ca-certificates
 curl
 device-mapper
@@ -15,7 +16,6 @@ man-db
 man-pages
 mdadm
 openssh
-pacman-contrib
 procps-ng
 ps_mem
 sudo
