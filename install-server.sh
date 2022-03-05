@@ -129,7 +129,10 @@ if [[ "$filesystem" == "btrfs" ]]; then
     # write first snapshot info manually
     mount -o subvol=root "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
     snapper --no-dbus -c root create-config /mnt
-    snapper create --read-write --description "initial archserver"
+    snapper create \
+        --read-write \
+        --cleanup-algorithm number \
+        --description "initial install"
     umount /mnt
 
 
