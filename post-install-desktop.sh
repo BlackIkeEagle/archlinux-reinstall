@@ -64,12 +64,6 @@ timedatectl set-ntp 1
 
 # btrfs related
 if which snapper > /dev/null 2>&1; then
-    snapper --no-dbus -c root create-config /
-    sed \
-        -e 's/\(^NUMBER_LIMIT=\).*/\1"20"/' \
-        -e 's/\(^NUMBER_LIMIT_IMPORTANT=\).*/\1"5"/' \
-        -e 's/\(^TIMELINE_CREATE=\).*/\1"no"/' \
-        -i /etc/snapper/configs/root
     systemctl enable snapper-timeline.timer
     systemctl enable snapper-cleanup.timer
 fi

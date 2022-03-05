@@ -208,6 +208,9 @@ if [[ "$filesystem" == "btrfs" ]]; then
     cp -a /etc/snapper/configs/root \
         /mnt/etc/snapper/configs/root
     sed -e 's/\(SUBVOLUME=\).*/\1"\/"/' \
+        -e 's/\(^NUMBER_LIMIT=\).*/\1"20"/' \
+        -e 's/\(^NUMBER_LIMIT_IMPORTANT=\).*/\1"5"/' \
+        -e 's/\(^TIMELINE_CREATE=\).*/\1"no"/' \
         -i /mnt/etc/snapper/configs/root
 fi
 
