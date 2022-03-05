@@ -191,12 +191,6 @@ fi
 # use our mirrorlist, not the one from the iso
 cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
-# make sure the pacman db is on the root subvolume if btrfs is in use
-if [[ "$filesystem" == "btrfs" ]]; then
-    sed -e 's/#\(DBPath.*=\).*/\1 \/opt\/pacman/' -i ./etc/pacman.conf
-    mkdir -p /mnt/opt/pacman
-fi
-
 # install packages
 # shellcheck disable=SC2046
 pacstrap -C ./etc/pacman.conf /mnt \
@@ -218,6 +212,9 @@ if [[ "$filesystem" == "btrfs" ]]; then
         -e 's/\(^NUMBER_LIMIT_IMPORTANT=\).*/\1"5"/' \
         -e 's/\(^TIMELINE_CREATE=\).*/\1"no"/' \
         -i /mnt/etc/snapper/configs/root
+    # make sure the pacman db is on the root subvolume if btrfs is in use
+    sed -e 's/#\(DBPath.*=\).*/\1 \/opt\/pacman/' -i /mnt/etc/pacman.conf
+    mv /mnt/var/lib/pacman /mnt/opt/pacman
 fi
 
 # install the remaining packages (avoid gpg key issues with extra packages)
