@@ -226,7 +226,7 @@ cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 # shellcheck disable=SC2046
 pacstrap -C ./etc/pacman.conf /mnt \
     $(cat "${basepackagelist[@]}") \
-    "$bootloaderpackage"
+    $bootloaderpackage
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
