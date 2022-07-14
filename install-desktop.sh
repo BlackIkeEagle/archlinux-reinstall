@@ -99,9 +99,9 @@ if [[ "$boottype" == "efi" ]]; then
         mkpart ESP fat32 0% 200MiB \
         set 1 esp on \
         set 1 legacy_boot on \
-        mkpart primary 200MiB 400MiB \
-        mkpart primary 400MiB 4496MiB \
-        mkpart primary 4496MiB 100%
+        mkpart primary 200MiB 600MiB \
+        mkpart primary 600MiB 4696MiB \
+        mkpart primary 4696MiB 100%
 
     efipart=1
 
@@ -112,10 +112,10 @@ else
         mklabel gpt \
         mkpart non-fs 0% 2MiB \
         set 1 bios_grub on \
-        mkpart primary 2MiB 200MiB \
+        mkpart primary 2MiB 400MiB \
         set 2 boot on \
-        mkpart primary 200MiB 4296MiB \
-        mkpart primary 4296MiB 100%
+        mkpart primary 400MiB 4496MiB \
+        mkpart primary 4496MiB 100%
 fi
 
 bootpart=2
