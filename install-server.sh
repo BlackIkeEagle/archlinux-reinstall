@@ -108,14 +108,16 @@ rootpart=4
 mkfs.ext2 -L boot "/dev/${blockdev}${partitionextra}${bootpart}"
 
 basepackagelist=("server-base-packages.txt")
+
+rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
     pacman -Sy --noconfirm snapper
 
     # "ROOT"
-    mkfs.btrfs -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
-    mount "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mkfs.btrfs -L ROOT "$rootdev"
+    mount "$rootdev" /mnt
     btrfs subvolume create /mnt/root
     btrfs subvolume create /mnt/home
     btrfs subvolume create /mnt/srv
@@ -127,7 +129,7 @@ if [[ "$filesystem" == "btrfs" ]]; then
     umount /mnt
 
     # write first snapshot info manually
-    mount -o subvol=root "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mount -o subvol=root "$rootdev" /mnt
     snapper --no-dbus -c root create-config /mnt
     snapper create \
         --read-write \
@@ -136,7 +138,7 @@ if [[ "$filesystem" == "btrfs" ]]; then
     umount /mnt
 
 
-    mount "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mount "$rootdev" /mnt
     btrfs subvolume list -p /mnt
 
     # root subvol id
@@ -147,29 +149,29 @@ if [[ "$filesystem" == "btrfs" ]]; then
 
     rootmountoptions="rw,noatime,nodiratime,discard=async,compress=zstd"
 
-    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
     mkdir -p /mnt/.snapshots
-    mount -o $rootmountoptions,subvol=root/.snapshots "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/.snapshots
+    mount -o $rootmountoptions,subvol=root/.snapshots "$rootdev" /mnt/.snapshots
     mkdir -p /mnt/home
-    mount -o $rootmountoptions,subvol=home "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/home
+    mount -o $rootmountoptions,subvol=home "$rootdev" /mnt/home
     mkdir -p /mnt/srv
-    mount -o $rootmountoptions,subvol=srv "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/srv
+    mount -o $rootmountoptions,subvol=srv "$rootdev" /mnt/srv
     mkdir -p /mnt/usr/local
-    mount -o $rootmountoptions,subvol=usr/local "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/usr/local
+    mount -o $rootmountoptions,subvol=usr/local "$rootdev" /mnt/usr/local
     mkdir -p /mnt/var
-    mount -o $rootmountoptions,subvol=var "/dev/${blockdev}${partitionextra}${rootpart}" /mnt/var
+    mount -o $rootmountoptions,subvol=var "$rootdev" /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
     basepackagelist+=("xfs-packages.txt")
 
-    mkfs.xfs -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
+    mkfs.xfs -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
-    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
 elif [[ "$filesystem" == "ext4" ]]; then
     basepackagelist+=("ext4-packages.txt")
 
-    mkfs.ext4 -L ROOT "/dev/${blockdev}${partitionextra}${rootpart}"
+    mkfs.ext4 -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,data=ordered,discard"
-    mount -o $rootmountoptions "/dev/${blockdev}${partitionextra}${rootpart}" /mnt
+    mount -o $rootmountoptions "$rootdev" /mnt
 else
     echo "unsupported filesystem defined"
     exit 1
