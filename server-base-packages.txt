@@ -11,6 +11,7 @@ htop
 iptables-nft
 less
 linux-besrv
+linux-firmware
 logrotate
 man-db
 man-pages
