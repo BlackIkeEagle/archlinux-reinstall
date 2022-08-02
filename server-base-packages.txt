@@ -19,6 +19,7 @@ mdadm
 openssh
 procps-ng
 ps_mem
+rsync
 sudo
 sysfsutils
 tmux
