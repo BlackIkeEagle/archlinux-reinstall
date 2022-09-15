@@ -8,6 +8,7 @@ discover
 dolphin
 dolphin-plugins
 drkonqi
+ffmpegthumbs
 filelight
 gwenview
 kactivitymanagerd
@@ -29,6 +30,7 @@ kfloppy
 kgamma5
 khelpcenter
 khotkeys
+kimageformats
 kinfocenter
 kio-extras
 kleopatra
@@ -67,6 +69,7 @@ polkit-kde-agent
 powerdevil
 print-manager
 python-pyqt5
+qt5-imageformats
 sddm
 sddm-kcm
 simplescreenrecorder
