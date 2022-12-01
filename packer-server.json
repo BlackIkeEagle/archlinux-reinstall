@@ -1,7 +1,7 @@
 {
     "variables": {
         "iso_url": "https://geo.mirror.pkgbuild.com/iso/latest/archlinux-{{isotime \"2006.01\"}}.01-x86_64.iso",
-        "iso_checksum_url": "https://geo.mirror.pkgbuild.com/iso/latest/sha1sums.txt",
+        "iso_checksum_url": "https://geo.mirror.pkgbuild.com/iso/latest/sha256sums.txt",
         "install_mirror": "https://geo.mirror.pkgbuild.com/$repo/os/$arch",
         "disk_size": "20480",
         "headless": "true",
