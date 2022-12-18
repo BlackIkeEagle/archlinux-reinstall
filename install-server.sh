@@ -82,9 +82,8 @@ if [[ "$boottype" == "efi" ]]; then
         mkpart ESP fat32 0% 200MiB \
         set 1 esp on \
         set 1 legacy_boot on \
-        mkpart primary 200MiB 600MiB \
-        mkpart primary 600MiB 4696MiB \
-        mkpart primary 4696MiB 100%
+        mkpart primary 200MiB 4296MiB \
+        mkpart primary 4296MiB 100%
 
     efipart=1
 
@@ -95,21 +94,17 @@ else
         mklabel gpt \
         mkpart non-fs 0% 2MiB \
         set 1 bios_grub on \
-        mkpart primary 2MiB 400MiB \
-        set 2 boot on \
-        mkpart primary 400MiB 4496MiB \
-        mkpart primary 4496MiB 100%
+        mkpart primary 2MiB 4098MiB \
+        mkpart primary 4098MiB 100% \
+        set 3 boot on
 fi
 
-bootpart=2
-swappart=3
-rootpart=4
-
-mkfs.ext2 -L boot "/dev/${blockdev}${partitionextra}${bootpart}"
-
-basepackagelist=("server-base-packages.txt")
+swappart=2
+rootpart=3
 
 rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
+
+basepackagelist=("server-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("btrfs-packages.txt")
 
@@ -181,13 +176,11 @@ bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
     mkdir -p /mnt/boot/efi
     mount "/dev/${blockdev}${partitionextra}${efipart}" /mnt/boot/efi
-    mkdir -p /mnt/boot/efi/EFI/archlinux
+    mkdir -p /mnt/boot/efi/EFI/BOOT
 else
     mkdir -p /mnt/boot
-    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
 fi
 
 # use our mirrorlist, not the one from the iso
@@ -251,6 +244,11 @@ echo "::1 localhost archserver-$randstring" >> /mnt/etc/hosts
 # just swap
 mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 
+(
+    echo ""
+    echo "/dev/${blockdev}${partitionextra}${swappart}  none  swap  defaults  0  0"
+) >> /mnt/etc/fstab
+
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
     arch-chroot /mnt grub-install \
@@ -272,7 +270,11 @@ fi
 # bootloader extra cmd
 eval "$(blkid -o export "/dev/${blockdev}${partitionextra}${rootpart}")"
 ROOTUUID=$UUID
-grubcmd="root=/dev/disk/by-uuid/$ROOTUUID rootflags=$rootmountoptions"
+
+grubcmd="root=/dev/disk/by-uuid/$ROOTUUID"
+
+## root filesystem flags
+grubcmd="$grubcmd rootflags=$rootmountoptions"
 if [[ "$btrfsroroot" == "yes" ]]; then
     grubcmd="$grubcmd ro"
 fi

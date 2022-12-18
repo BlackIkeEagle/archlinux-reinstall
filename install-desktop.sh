@@ -6,24 +6,8 @@ echo "*** WARNING ****************************************************"
 echo "* HAVE YOU PASSED IN THE PACKAGE FILES YOU WANT FOR INSTALL ?  *"
 echo "*** WARNING ****************************************************"
 
-[[ ! -d /media/usb ]] && mkdir -p /media/usb
-
 echo "AVAILABLE BLOCK DEVICES"
 lsblk
-
-echo -n "Do you want to encrypt your harddisk (yes/no): "
-read -r encrypt
-
-if [[ "$encrypt" != "no" ]]; then
-    encrypt="yes"
-fi
-
-if [[ "$encrypt" == "yes" ]]; then
-    echo -n "enter the usb key device name (sda1,sdb1): "
-    read -r usbkey
-
-    mount "/dev/$usbkey" /media/usb
-fi
 
 echo -n "enter the block device's name (sda,nvme1): "
 read -r blockdev
@@ -48,7 +32,6 @@ read -r fullname
 
 echo -n "set your password: "
 read -r password
-
 
 if [[ "$blockdev" == "" ]]; then
     echo "no blockdev given"
@@ -99,9 +82,8 @@ if [[ "$boottype" == "efi" ]]; then
         mkpart ESP fat32 0% 200MiB \
         set 1 esp on \
         set 1 legacy_boot on \
-        mkpart primary 200MiB 600MiB \
-        mkpart primary 600MiB 4696MiB \
-        mkpart primary 4696MiB 100%
+        mkpart primary 200MiB 4296MiB \
+        mkpart primary 4296MiB 100%
 
     efipart=1
 
@@ -112,31 +94,15 @@ else
         mklabel gpt \
         mkpart non-fs 0% 2MiB \
         set 1 bios_grub on \
-        mkpart primary 2MiB 400MiB \
-        set 2 boot on \
-        mkpart primary 400MiB 4496MiB \
-        mkpart primary 4496MiB 100%
+        mkpart primary 2MiB 4098MiB \
+        mkpart primary 4098MiB 100% \
+        set 3 boot on
 fi
 
-bootpart=2
-swappart=3
-rootpart=4
+swappart=2
+rootpart=3
 
-mkfs.ext2 -L boot "/dev/${blockdev}${partitionextra}${bootpart}"
-
-if [[ "$encrypt" == "yes" ]]; then
-    # encryption on "ROOT"
-    dd bs=512 count=8 if=/dev/urandom of="/media/usb/keyfile-$randstring"
-    lukspassword="$(date +%s | sha256sum | base64 | head -c 32)"
-    echo "$lukspassword" > "/media/usb/luks-password-$randstring.txt"
-    echo "$lukspassword" | cryptsetup -y luksFormat "/dev/${blockdev}${partitionextra}${rootpart}"
-    echo "$lukspassword" | cryptsetup -y luksAddKey "/dev/${blockdev}${partitionextra}${rootpart}" "/media/usb/keyfile-$randstring"
-    cryptsetup open "/dev/${blockdev}${partitionextra}${rootpart}" archlinux --key-file "/media/usb/keyfile-$randstring"
-
-    rootdev="/dev/mapper/archlinux"
-else
-    rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
-fi
+rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
 
 basepackagelist=("base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
@@ -210,13 +176,11 @@ bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
     bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
-    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
     mkdir -p /mnt/boot/efi
     mount "/dev/${blockdev}${partitionextra}${efipart}" /mnt/boot/efi
-    mkdir -p /mnt/boot/efi/EFI/archlinux
+    mkdir -p /mnt/boot/efi/EFI/BOOT
 else
     mkdir -p /mnt/boot
-    mount "/dev/${blockdev}${partitionextra}${bootpart}" /mnt/boot
 fi
 
 # use our mirrorlist, not the one from the iso
@@ -277,24 +241,12 @@ echo "archlinux-$randstring" > /mnt/etc/hostname
 echo "127.0.0.1 localhost archlinux-$randstring" >> /mnt/etc/hosts
 echo "::1 localhost archlinux-$randstring" >> /mnt/etc/hosts
 
-if [[ "$encrypt" == "yes" ]]; then
-    # encrypted swap
-    mkfs.ext2 -L cryptswap "/dev/${blockdev}${partitionextra}${swappart}" 1M
+mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 
-    printf "\nswap  LABEL=cryptswap  /dev/urandom  swap,offset=2048,cipher=aes-xts-plain64,size=512" \
-        >> /mnt/etc/crypttab
-
-    printf "\n/dev/mapper/swap  none  swap  defaults  0  0" \
-        >> /mnt/etc/fstab
-
-else
-    mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
-
-    (
-        echo ""
-        echo "/dev/${blockdev}${partitionextra}${swappart}  none  swap  defaults  0  0"
-    ) >> /mnt/etc/fstab
-fi
+(
+    echo ""
+    echo "/dev/${blockdev}${partitionextra}${swappart}  none  swap  defaults  0  0"
+) >> /mnt/etc/fstab
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
@@ -318,23 +270,7 @@ fi
 eval "$(blkid -o export "/dev/${blockdev}${partitionextra}${rootpart}")"
 ROOTUUID=$UUID
 
-if [[ "$encrypt" == "yes" ]]; then
-    grubcmd="rd.luks.name=$ROOTUUID=archlinux rd.luks.options=allow-discards"
-    ## find usb with keyfile
-    usbdev=$(grep '/media/usb' /etc/mtab | awk '{ print $1 }')
-    # shellcheck disable=SC2181
-    if [[ $? -eq 0 ]] && [[ "" != "$usbdev" ]]; then
-        eval "$(blkid -o export "$usbdev")"
-        grubcmd="$grubcmd rd.luks.key=$ROOTUUID=/keyfile-$randstring:UUID=$UUID"
-        if [[ "ext2" == "$TYPE" ]] || [[ "ext3" == "$TYPE" ]]; then
-            TYPE="ext4"
-        fi
-        sed -e "s/^\(MODULES=(.*\)\()\)/\1 $TYPE\2/" \
-            -i /mnt/etc/mkinitcpio.conf
-    fi
-else
-    grubcmd="root=/dev/disk/by-uuid/$ROOTUUID"
-fi
+grubcmd="root=/dev/disk/by-uuid/$ROOTUUID"
 
 ## root filesystem flags
 grubcmd="$grubcmd rootflags=$rootmountoptions"
