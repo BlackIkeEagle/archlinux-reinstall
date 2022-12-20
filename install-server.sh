@@ -76,6 +76,9 @@ if [[ "$checkblocks" == "yes" ]]; then
     badblocks -c 10240 -s -w -t random -v "/dev/$blockdev"
 fi
 
+# force local update of archlinux-keyring
+/usr/bin/archlinux-keyring-wkd-sync
+
 if [[ "$boottype" == "efi" ]]; then
     parted --script "/dev/$blockdev" \
         mklabel gpt \

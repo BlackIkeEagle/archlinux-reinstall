@@ -76,6 +76,9 @@ if [[ "$checkblocks" == "yes" ]]; then
     badblocks -c 10240 -s -w -t random -v "/dev/$blockdev"
 fi
 
+# force local update of archlinux-keyring
+/usr/bin/archlinux-keyring-wkd-sync
+
 if [[ "$boottype" == "efi" ]]; then
     parted --script "/dev/$blockdev" \
         mklabel gpt \
@@ -301,6 +304,7 @@ fi
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # finish the installation
+cp -a create-user.sh /mnt/root/
 cp -a post-install-desktop.sh /mnt
 arch-chroot /mnt /post-install-desktop.sh "$user" "$fullname" "$password"
 

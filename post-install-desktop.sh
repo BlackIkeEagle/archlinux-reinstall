@@ -62,6 +62,9 @@ fi
 
 timedatectl set-ntp 1
 
+# enable systemd-homed
+systemctl enable systemd-homed.service
+
 # btrfs related
 if which snapper > /dev/null 2>&1; then
     systemctl enable snapper-timeline.timer
