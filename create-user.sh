@@ -30,6 +30,7 @@ homectl create "$name" \
     --real-name="$fullname" \
     --shell="/usr/bin/zsh" \
     --storage=luks \
+    --luks-discard=true \
     --fs-type=ext4 \
     $groups
 
