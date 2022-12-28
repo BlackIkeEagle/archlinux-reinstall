@@ -22,42 +22,46 @@ if [[ -z "$fullname" ]]; then
     fullname="Ike Devolder"
 fi
 
-# groups
-groups="wheel"
-if which docker > /dev/null 2>&1; then
-    groups="$groups,docker"
-fi
-if which virtualbox > /dev/null 2>&1; then
-    groups="$groups,vboxusers"
+if [[ "$name" != "root" ]]; then
+    # groups
+    groups="wheel"
+    if which docker > /dev/null 2>&1; then
+        groups="$groups,docker"
+    fi
+    if which virtualbox > /dev/null 2>&1; then
+        groups="$groups,vboxusers"
+    fi
+
+    useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" "$name"
+
+    # subuid / subgid
+    touch /etc/subuid
+    touch /etc/subgid
+    usermod --add-subuids 100000-165535 "$name"
+    usermod --add-subgids 100000-165535 "$name"
+
+    if [[ "$name" == "vagrant" ]]; then
+        echo "$name ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/$name
+    else
+        echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
+    fi
+    chmod u=rw,g=r,o= /etc/sudoers.d/$name
+
+    if [[ "$name" == "vagrant" ]]; then
+        mkdir -p /home/vagrant/.ssh
+        chown vagrant:vagrant /home/vagrant/.ssh
+        curl --output /home/vagrant/.ssh/authorized_keys \
+            --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
+        chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys
+        chmod 0600 /home/vagrant/.ssh/authorized_keys
+    fi
+
 fi
 
-useradd -U -m -c "$fullname" -s /usr/bin/zsh -G "$groups" "$name"
 if [[ -n "$password" ]]; then
     echo "$name:$password" | chpasswd
 else
     passwd $name
-fi
-
-# subuid / subgid
-touch /etc/subuid
-touch /etc/subgid
-usermod --add-subuids 100000-165535 "$name"
-usermod --add-subgids 100000-165535 "$name"
-
-if [[ "$name" == "vagrant" ]]; then
-    echo "$name ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/$name
-else
-    echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
-fi
-chmod u=rw,g=r,o= /etc/sudoers.d/$name
-
-if [[ "$name" == "vagrant" ]]; then
-    mkdir -p /home/vagrant/.ssh
-    chown vagrant:vagrant /home/vagrant/.ssh
-    curl --output /home/vagrant/.ssh/authorized_keys \
-        --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
-    chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys
-    chmod 0600 /home/vagrant/.ssh/authorized_keys
 fi
 
 timedatectl set-ntp 1
