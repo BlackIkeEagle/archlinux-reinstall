@@ -29,16 +29,9 @@ fi
 homectl create "$name" \
     --real-name="$fullname" \
     --shell="/usr/bin/zsh" \
-    $groups \
-
-ssh_auth_key=''
-if [[ "$name" == "vagrant" ]]; then
-    ssh_auth_key=$(curl --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub)
-    homectl update "$name" \
-        --ssh-authorized-keys="$ssh_auth_key"
-fi
-
-homectl passwd "$name"
+    --storage=luks \
+    --fs-type=ext4 \
+    $groups
 
 # subuid / subgid
 touch /etc/subuid
@@ -46,9 +39,5 @@ touch /etc/subgid
 usermod --add-subuids 100000-165535 "$name"
 usermod --add-subgids 100000-165535 "$name"
 
-if [[ "$name" == "vagrant" ]]; then
-    echo "$name ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/$name
-else
-    echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
-fi
+echo "$name ALL=(ALL) ALL" > /etc/sudoers.d/$name
 chmod u=rw,g=r,o= /etc/sudoers.d/$name
