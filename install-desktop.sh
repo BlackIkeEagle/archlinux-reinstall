@@ -304,7 +304,7 @@ fi
 arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # finish the installation
-cp -a create-user.sh /mnt/root/
+cp -a create-user.sh create-admin-user.sh /mnt/root/
 cp -a post-install-desktop.sh /mnt
 arch-chroot /mnt /post-install-desktop.sh "$user" "$fullname" "$password"
 

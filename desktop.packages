@@ -1,11 +1,7 @@
-bitwarden-bin
 copyq
 flatpak
 flatpak-xdg-utils
 fwupd
-gst-plugins-bad
-gst-plugins-good
-gst-plugins-ugly
 iwd
 libreoffice-fresh
 mpv
@@ -19,7 +15,7 @@ pipewire-pulse
 quassel-client-qt
 smartmontools
 speedcrunch
-strawberry
+strawberry-vlc
 thermald
 ttf-dejavu
 ttf-hack
