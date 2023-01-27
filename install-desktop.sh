@@ -282,6 +282,7 @@ if [[ "$btrfsroroot" == "yes" ]]; then
 fi
 grubcmd="${grubcmd//\//\\\/}"
 grubcmd="$grubcmd mem_sleep_default=deep"
+grubcmd="$grubcmd lockdown=integrity"
 
 ## add grub GRUB_CMDLINE_LINUX
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
