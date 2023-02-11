@@ -10,7 +10,6 @@ dolphin-plugins
 drkonqi
 ffmpegthumbs
 filelight
-gwenview
 kactivitymanagerd
 kamera
 kate
@@ -72,7 +71,6 @@ python-pyqt5
 qt5-imageformats
 sddm
 sddm-kcm
-simplescreenrecorder
 spectacle
 sweeper
 systemsettings

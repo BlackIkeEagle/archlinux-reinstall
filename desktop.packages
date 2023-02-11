@@ -3,7 +3,6 @@ flatpak
 flatpak-xdg-utils
 fwupd
 iwd
-libreoffice-fresh
 mpv
 noto-fonts
 noto-fonts-cjk
@@ -12,9 +11,7 @@ noto-fonts-extra
 p7zip
 pipewire-alsa
 pipewire-pulse
-quassel-client-qt
 smartmontools
-speedcrunch
 strawberry-vlc
 thermald
 ttf-dejavu
