@@ -11,6 +11,7 @@ noto-fonts-extra
 p7zip
 pipewire-alsa
 pipewire-pulse
+power-profiles-daemon
 smartmontools
 strawberry-vlc
 thermald

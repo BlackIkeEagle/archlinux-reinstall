@@ -86,6 +86,9 @@ fi
 if which firewalld > /dev/null 2>&1; then
     systemctl enable firewalld.service
 fi
+if which powerprofilesctl > /dev/null 2>&1; then
+    systemctl enable power-profiles-daemon.service
+fi
 if which thermald > /dev/null 2>&1; then
     systemctl enable thermald.service
 fi
