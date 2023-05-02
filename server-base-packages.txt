@@ -5,7 +5,6 @@ blackikeeagle-system-update
 ca-certificates
 curl
 device-mapper
-dhcpcd
 firewalld
 htop
 iptables-nft
@@ -18,7 +17,6 @@ man-pages
 mdadm
 openssh
 procps-ng
-ps_mem
 rsync
 sudo
 sysfsutils
