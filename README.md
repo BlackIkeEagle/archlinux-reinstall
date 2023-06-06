@@ -5,7 +5,7 @@ This provides a "simple" way to (re)install my Arch Linux Laptop(s).
 
 ## Warning
 
-The disk you say to setup to will be completely formatted.
+The selected disk for installation will be completely wiped.
 
 ## Steps
 
@@ -27,32 +27,9 @@ $ loadkeys be-latin1
 
 Or `loadkeys` with your keymap.
 
-#### wifi
+#### network
 
-Configure wifi if needed
-
-```
-$ wifi-menu
-```
-#### prepare usb 'key' device
-
-If you have an empty device you also have to format it.
-
-```
-$ mkfs.ext2 -L keydrive /dev/sdb1
-```
-
-Make the `/media/usb` directory.
-
-```
-$ mkdir -p /media/usb
-```
-
-And then mount the usb 'key' device to `/media/usb`
-
-```
-$ mount /dev/sdb1 /media/usb
-```
+https://wiki.archlinux.org/title/Installation_guide#Connect_to_the_internet
 
 #### get the archlinux-reinstall repo
 
@@ -79,16 +56,11 @@ If you run as described above you will get a minimal install of archlinux with m
 
 #### reboot and post install
 
-Reboot and remove the installation medium.
-
-when logged in as root, first run `./post-install-first-run.sh`. And then continue configuring whatever you want.
+When you have chosen to install with a root user and by doing so want to make
+use of `systemd-homed` you can use the `./create-admin-user.sh` or
+`./create-user.sh` scripts to generate a normal user for you to use.
 
 ### installer types
 
 - install.sh: minimal install
 - install-plasma.sh: installation with common packages for plasma desktop
-- install-deepin.sh: installation with common packages for deepin desktop
-- install-i3.sh: installation with common packages for i3 wm
-- install-fluxbox.sh: installation with common packages for fluxbox wm
-
-By default there is a user 'ike', this you have to change manually in the `post-install-first-run.sh` script.
