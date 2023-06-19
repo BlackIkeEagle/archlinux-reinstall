@@ -186,6 +186,16 @@ else
     mkdir -p /mnt/boot
 fi
 
+# ucode package
+cpu_vendor="$(lscpu | grep 'Vendor' | awk '{ print $NF }')"
+ucode_package=''
+
+if [[ "GenuineIntel" == "$cpu_vendor" ]]; then
+    ucode_package="intel-ucode"
+elif [[ "AuthenticAMD" == "$cpu_vendor" ]]; then
+    ucode_package="amd-ucode"
+fi
+
 # use our mirrorlist, not the one from the iso
 cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -193,7 +203,8 @@ cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 # shellcheck disable=SC2046
 pacstrap -C ./etc/pacman.conf /mnt \
     $(cat "${basepackagelist[@]}") \
-    $bootloaderpackage
+    $bootloaderpackage \
+    $ucode_package
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
