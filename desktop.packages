@@ -8,6 +8,7 @@ noto-fonts-emoji
 noto-fonts-extra
 p7zip
 pipewire-alsa
+pipewire-jack
 pipewire-pulse
 power-profiles-daemon
 smartmontools
