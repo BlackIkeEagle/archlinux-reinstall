@@ -4,7 +4,7 @@
         "iso_checksum_url": "https://geo.mirror.pkgbuild.com/iso/latest/sha256sums.txt",
         "disk_size": "20480",
         "headless": "true",
-        "boot_wait": "40s",
+        "boot_wait": "60s",
         "filesystem": "xfs",
         "disk_type": "regular",
         "admin_user": "vagrant",
