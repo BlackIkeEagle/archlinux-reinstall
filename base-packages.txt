@@ -18,9 +18,7 @@ man-db
 man-pages
 mdadm
 networkmanager
-networkmanager-openvpn
 openssh
-openvpn
 procps-ng
 sudo
 sysfsutils
