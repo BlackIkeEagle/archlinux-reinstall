@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-for desktoptype in plasma; do
+for desktoptype in plasma5; do
     for filesystem in xfs ext4 btrfs; do
         ./packer-build-desktop "$@" \
             -var "install_type=-$desktoptype" \

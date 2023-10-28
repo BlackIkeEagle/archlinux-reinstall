@@ -8,10 +8,8 @@ discover
 dolphin
 dolphin-plugins
 ffmpegthumbs
-filelight
 flatpak-kcm
 kactivitymanagerd
-kamera
 kate
 kde-cli-tools
 kde-gtk-config
@@ -22,11 +20,9 @@ kfind
 kgamma5
 khelpcenter
 khotkeys
-kimageformats
+kimageformats5
 kinfocenter
 konsole
-krename
-krusader
 kscreen
 ksshaskpass
 ksysguard
@@ -36,6 +32,7 @@ kwayland-integration
 kwin
 kwrited
 nextcloud-client
+nextcloud-client-cloudproviders
 plasma-browser-integration
 plasma-desktop
 plasma-integration
@@ -52,8 +49,6 @@ qt5-imageformats
 sddm
 sddm-kcm
 spectacle
-sweeper
 systemsettings
 xdg-desktop-portal-gtk
 xdg-desktop-portal-kde
-yakuake
