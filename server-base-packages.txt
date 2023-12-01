@@ -9,6 +9,7 @@ firewalld
 htop
 iptables-nft
 less
+libfido2
 linux-besrv
 linux-firmware
 logrotate
