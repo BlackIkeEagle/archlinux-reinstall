@@ -51,15 +51,13 @@ if [[ "$name" == "vagrant" ]]; then
     chmod 0600 /home/vagrant/.ssh/authorized_keys
     # remove default network config
     rm -f /etc/systemd/network/*
-    for interface in ens0 ens1 ens2 ens3 ens4 ens5; do
-        cat <<EOF >/etc/systemd/network/$interface.network
+    cat <<EOF >/etc/systemd/network/en.network
 [Match]
-Name=$interface
+Name=en*
 
 [Network]
 DHCP=ipv4
 EOF
-    done
 fi
 
 timedatectl set-ntp 1
