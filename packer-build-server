@@ -6,6 +6,6 @@ tar -zcf archlinux-reinstall.tar.gz ./*.txt ./*.packages ./*.sh ./etc*
 
 echo "packer-build-server $*"
 
-packer build "$@" packer-server.json
+packer build "$@" packer-server.pkr.hcl
 
 rm archlinux-reinstall.tar.gz
