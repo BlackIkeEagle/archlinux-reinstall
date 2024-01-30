@@ -64,7 +64,9 @@ else
     passwd $name
 fi
 
+# enable timesyncd
 timedatectl set-ntp 1
+systemctl enable systemd-timesyncd.service
 
 # enable systemd-homed
 systemctl enable systemd-homed.service

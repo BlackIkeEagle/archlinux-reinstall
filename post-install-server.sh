@@ -60,7 +60,9 @@ DHCP=ipv4
 EOF
 fi
 
+# enable timesyncd
 timedatectl set-ntp 1
+systemctl enable systemd-timesyncd.service
 
 # btrfs related
 if which snapper > /dev/null 2>&1; then
