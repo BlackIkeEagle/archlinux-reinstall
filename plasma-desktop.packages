@@ -3,9 +3,12 @@ breeze5
 colord-kde
 dolphin
 dolphin-plugins
+ebook-tools
 ffmpegthumbs
 flatpak-kcm
+gwenview
 kate
+kdegraphics-thumbnailers
 kdialog
 keditbookmarks
 kfind
@@ -14,8 +17,10 @@ konsole
 kwalletmanager
 nextcloud-client
 nextcloud-client-cloudproviders
+okular
 plasma-meta
 qt6-imageformats
 spectacle
+svgpart
 xdg-desktop-portal-gtk
 xdg-desktop-portal-kde
