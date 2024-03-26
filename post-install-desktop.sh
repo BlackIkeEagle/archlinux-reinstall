@@ -96,10 +96,6 @@ if which thermald > /dev/null 2>&1; then
 fi
 if which NetworkManager > /dev/null 2>&1; then
     systemctl enable NetworkManager.service
-    if which iwctl > /dev/null 2>&1; then
-        systemctl mask wpa_supplicant.service
-        systemctl enable iwd.service
-    fi
 fi
 if which docker > /dev/null 2>&1; then
     systemctl enable docker.service
