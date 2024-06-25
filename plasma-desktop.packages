@@ -15,11 +15,13 @@ kfind
 kimageformats
 konsole
 kwalletmanager
+maliit-keyboard
 nextcloud-client
 nextcloud-client-cloudproviders
 okular
 plasma-meta
 qt6-imageformats
+sddm
 spectacle
 svgpart
 xdg-desktop-portal-gtk
