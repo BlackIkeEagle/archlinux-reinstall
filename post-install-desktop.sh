@@ -112,7 +112,9 @@ if which run-system-update > /dev/null 2>&1; then
 fi
 if which sddm > /dev/null 2>&1; then
     systemctl enable sddm.service
-fi
-if which lightdm > /dev/null 2>&1; then
+elif which gdm > /dev/null 2>&1; then
+    dconf update
+    systemctl enable gdm.service
+elif which lightdm > /dev/null 2>&1; then
     systemctl enable lightdm.service
 fi
