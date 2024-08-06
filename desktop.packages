@@ -12,7 +12,6 @@ pipewire-alsa
 pipewire-jack
 pipewire-pulse
 power-profiles-daemon
-python-pyqt5
 smartmontools
 thermald
 ttf-dejavu
