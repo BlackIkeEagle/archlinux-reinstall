@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<service>
-  <short>rpc.lockd</short>
-  <port port="32803" protocol="tcp"/>
-  <port port="32769" protocol="udp"/>
-</service>
