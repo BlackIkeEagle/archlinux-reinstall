@@ -63,7 +63,7 @@ variable "iso_url" {
 # The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.
 
 source "qemu" "libvirt" {
-  boot_command     = ["<enter><enter>", "systemctl stop sshd.service<enter><wait>", "curl -O 'http://{{ .HTTPIP }}:{{ .HTTPPort }}/archlinux-reinstall.tar.gz'<enter><wait>", "mkdir archlinux-reinstall && tar -xf archlinux-reinstall.tar.gz -C archlinux-reinstall<enter><wait>", "cd archlinux-reinstall<enter><wait>", "./install-desktop${var.install_type}.sh && systemctl reboot<enter>vda<enter>legacy<enter>${var.filesystem}<enter>${var.disk_type}<enter><enter>${var.admin_user}<enter>${var.admin_user}<enter>${var.admin_pass}<enter><enter><wait>"]
+  boot_command     = ["<enter><enter>", "systemctl stop sshd.service<enter><wait>", "curl -O 'http://{{ .HTTPIP }}:{{ .HTTPPort }}/archlinux-reinstall.tar.gz'<enter><wait>", "mkdir archlinux-reinstall && tar -xf archlinux-reinstall.tar.gz -C archlinux-reinstall<enter><wait>", "cd archlinux-reinstall<enter><wait>", "./desktop-install${var.install_type}.sh && systemctl reboot<enter>vda<enter>legacy<enter>${var.filesystem}<enter>${var.disk_type}<enter><enter>${var.admin_user}<enter>${var.admin_user}<enter>${var.admin_pass}<enter><enter><wait>"]
   boot_wait        = "${var.boot_wait}"
   cpus             = 2
   disk_compression = true

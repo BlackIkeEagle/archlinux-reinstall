@@ -107,9 +107,9 @@ rootpart=3
 
 rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
 
-basepackagelist=("server-base-packages.txt")
+basepackagelist=("desktop-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
-    basepackagelist+=("btrfs-packages.txt")
+    basepackagelist+=("fs-btrfs-packages.txt")
 
     pacman -Sy --noconfirm snapper
 
@@ -159,13 +159,13 @@ if [[ "$filesystem" == "btrfs" ]]; then
     mkdir -p /mnt/var
     mount -o $rootmountoptions,subvol=var "$rootdev" /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
-    basepackagelist+=("xfs-packages.txt")
+    basepackagelist+=("fs-xfs-packages.txt")
 
     mkfs.xfs -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
     mount -o $rootmountoptions "$rootdev" /mnt
 elif [[ "$filesystem" == "ext4" ]]; then
-    basepackagelist+=("ext4-packages.txt")
+    basepackagelist+=("fs-ext4-packages.txt")
 
     mkfs.ext4 -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,data=ordered,discard"
@@ -186,6 +186,16 @@ else
     mkdir -p /mnt/boot
 fi
 
+# ucode package
+cpu_vendor="$(lscpu | grep 'Vendor' | awk '{ print $NF }')"
+ucode_package=''
+
+if [[ "GenuineIntel" == "$cpu_vendor" ]]; then
+    ucode_package="intel-ucode"
+elif [[ "AuthenticAMD" == "$cpu_vendor" ]]; then
+    ucode_package="amd-ucode"
+fi
+
 # use our mirrorlist, not the one from the iso
 cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -193,11 +203,12 @@ cp ./etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 # shellcheck disable=SC2046
 pacstrap -C ./etc/pacman.conf /mnt \
     $(cat "${basepackagelist[@]}") \
-    $bootloaderpackage
+    $bootloaderpackage \
+    $ucode_package
 
 # copy all etc extras
 cp -a ./etc/ /mnt/
-cp -a ./etc-server/* /mnt/etc/
+cp -a ./etc-desktop/* /mnt/etc/
 chown root: -R /mnt/etc
 
 if [[ "$filesystem" == "btrfs" ]]; then
@@ -228,7 +239,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 sed -e '/\s\+\/\s\+/d' -i /mnt/etc/fstab
 
 # set timezone
-ln -sf /usr/share/zoneinfo/UTC /mnt/etc/localtime
+ln -sf /usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 
 # generate locales for en_US
@@ -240,11 +251,10 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
 
 # set hostname
-echo "archserver-$randstring" > /mnt/etc/hostname
-echo "127.0.0.1 localhost archserver-$randstring" >> /mnt/etc/hosts
-echo "::1 localhost archserver-$randstring" >> /mnt/etc/hosts
+echo "archlinux-$randstring" > /mnt/etc/hostname
+echo "127.0.0.1 localhost archlinux-$randstring" >> /mnt/etc/hosts
+echo "::1 localhost archlinux-$randstring" >> /mnt/etc/hosts
 
-# just swap
 mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 
 (
@@ -282,6 +292,7 @@ if [[ "$btrfsroroot" == "yes" ]]; then
     grubcmd="$grubcmd ro"
 fi
 grubcmd="${grubcmd//\//\\\/}"
+grubcmd="$grubcmd mem_sleep_default=deep"
 grubcmd="$grubcmd lockdown=integrity"
 
 ## add grub GRUB_CMDLINE_LINUX
@@ -302,14 +313,12 @@ else
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-arch-chroot /mnt mkinitcpio -p linux-besrv || true
-
-rm -f /mnt/etc/resolv.conf && \
-    ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
+arch-chroot /mnt mkinitcpio -p linux-bede || true
 
 # finish the installation
-cp -a post-install-server.sh /mnt
-arch-chroot /mnt /post-install-server.sh "$user" "$fullname" "$password"
+cp -a create-user.sh create-admin-user.sh /mnt/root/
+cp -a desktop-post-install.sh /mnt
+arch-chroot /mnt /desktop-post-install.sh "$user" "$fullname" "$password"
 
-rm /mnt/post-install-server.sh
+rm /mnt/desktop-post-install.sh
 
