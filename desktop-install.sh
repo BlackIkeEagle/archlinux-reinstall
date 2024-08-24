@@ -313,7 +313,7 @@ else
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-arch-chroot /mnt mkinitcpio -p linux-bede || true
+arch-chroot /mnt dracut-rebuild || true
 
 # finish the installation
 cp -a create-user.sh create-admin-user.sh /mnt/root/

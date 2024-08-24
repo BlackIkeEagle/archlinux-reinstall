@@ -1,6 +1,8 @@
 apparmor
 base
 blackikeeagle-system-update
+dracut
+dracut-hook
 ca-certificates
 cifs-utils
 cryptsetup
