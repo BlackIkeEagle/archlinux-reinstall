@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <service>
   <port port="9000" protocol="tcp"/>
+  <port port="9001" protocol="tcp"/>
+  <port port="9003" protocol="tcp"/>
 </service>
