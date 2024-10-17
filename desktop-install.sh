@@ -249,6 +249,8 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 
 # keyboard
 echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
+echo "XKBLAYOUT=be" >> /mnt/etc/vconsole.conf
+echo "XKBOPTIONS=terminate:ctrl_alt_bksp" >> /mnt/etc/vconsole.conf
 
 # set hostname
 echo "archlinux-$randstring" > /mnt/etc/hostname
