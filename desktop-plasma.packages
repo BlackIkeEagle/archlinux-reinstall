@@ -20,6 +20,7 @@ nextcloud-client-cloudproviders
 nextcloud-talk-desktop-bin
 okular
 plasma-meta
+qt5-wayland
 qt6-imageformats
 sddm
 spectacle
