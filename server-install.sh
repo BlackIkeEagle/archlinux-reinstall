@@ -109,7 +109,7 @@ rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
 
 basepackagelist=("server-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
-    basepackagelist+=("btrfs-packages.txt")
+    basepackagelist+=("fs-btrfs-packages.txt")
 
     pacman -Sy --noconfirm snapper
 
@@ -159,13 +159,13 @@ if [[ "$filesystem" == "btrfs" ]]; then
     mkdir -p /mnt/var
     mount -o $rootmountoptions,subvol=var "$rootdev" /mnt/var
 elif [[ "$filesystem" == "xfs" ]]; then
-    basepackagelist+=("xfs-packages.txt")
+    basepackagelist+=("fs-xfs-packages.txt")
 
     mkfs.xfs -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,attr2,inode64,noquota,discard"
     mount -o $rootmountoptions "$rootdev" /mnt
 elif [[ "$filesystem" == "ext4" ]]; then
-    basepackagelist+=("ext4-packages.txt")
+    basepackagelist+=("fs-ext4-packages.txt")
 
     mkfs.ext4 -L ROOT "$rootdev"
     rootmountoptions="rw,noatime,data=ordered,discard"
