@@ -214,8 +214,8 @@ chown root: -R /mnt/etc
 if [[ "$filesystem" == "btrfs" ]]; then
     cp -a /etc/conf.d/snapper \
         /mnt/etc/conf.d/snapper
-    cp -a /etc/snapper/configs/root \
-        /mnt/etc/snapper/configs/root
+    cp -a /etc/snapper \
+        /mnt/etc/snapper
     sed -e 's/\(SUBVOLUME=\).*/\1"\/"/' \
         -e 's/\(^NUMBER_LIMIT=\).*/\1"20"/' \
         -e 's/\(^NUMBER_LIMIT_IMPORTANT=\).*/\1"5"/' \
