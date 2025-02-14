@@ -21,6 +21,9 @@ read -r filesystem
 echo -n "nvme disk or regular (nvme|regular): "
 read -r nvmedisk
 
+echo -n "additional kernel commandline flags (default empty): "
+read -r kernelcmdline
+
 echo -n "check blocks (yes|no (default)): "
 read -r checkblocks
 
@@ -296,6 +299,9 @@ fi
 grubcmd="${grubcmd//\//\\\/}"
 grubcmd="$grubcmd mem_sleep_default=deep"
 grubcmd="$grubcmd lockdown=integrity"
+if [[ -n "$kernelcmdline" ]]; then
+    grubcmd="$grubcmd $kernelcmdline"
+fi
 
 ## add grub GRUB_CMDLINE_LINUX
 sed -e "s/^\(GRUB_CMDLINE_LINUX=\).*/\1\"$grubcmd\"/" \
