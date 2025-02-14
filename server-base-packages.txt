@@ -2,6 +2,8 @@ apparmor
 atop
 base
 blackikeeagle-system-update
+dracut
+dracut-hook
 ca-certificates
 curl
 device-mapper
