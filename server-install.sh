@@ -82,7 +82,11 @@ fi
 # force local update of archlinux-keyring
 /usr/bin/archlinux-keyring-wkd-sync
 
+basepackagelist=("server-base-packages.txt")
+
 if [[ "$boottype" == "efi" ]]; then
+    basepackagelist+=("efi-packages.txt")
+
     parted --script "/dev/$blockdev" \
         mklabel gpt \
         mkpart ESP fat32 0% 200MiB \
@@ -110,7 +114,6 @@ rootpart=3
 
 rootdev="/dev/${blockdev}${partitionextra}${rootpart}"
 
-basepackagelist=("server-base-packages.txt")
 if [[ "$filesystem" == "btrfs" ]]; then
     basepackagelist+=("fs-btrfs-packages.txt")
 
@@ -180,7 +183,6 @@ fi
 
 bootloaderpackage=grub
 if [[ "$boottype" == "efi" ]]; then
-    bootloaderpackage="$bootloaderpackage efibootmgr"
     mkdir -p /mnt/boot
     mkdir -p /mnt/boot/efi
     mount "/dev/${blockdev}${partitionextra}${efipart}" /mnt/boot/efi
