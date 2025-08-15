@@ -239,25 +239,39 @@ arch-chroot /mnt hwclock --systohc
 # generate locales for en_US
 sed -e 's/#en_US/en_US/g' -e 's/#nl_BE/nl_BE/g' -i /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
-echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+{
+    echo "LANG=en_US.UTF-8"
+    echo "LC_NUMERIC=nl_BE.UTF-8"
+    echo "LC_TIME=nl_BE.UTF-8"
+    echo "LC_COLLATE=en_US.UTF-8"
+    echo "LC_MONETARY=nl_BE.UTF-8"
+    echo "LC_NAME=nl_BE.UTF-8"
+    echo "LC_ADDRESS=nl_BE.UTF-8"
+    echo "LC_TELEPHONE=nl_BE.UTF-8"
+    echo "LC_MEASUREMENT=nl_BE.UTF-8"
+} > /mnt/etc/locale.conf
 
 # keyboard
-echo "KEYMAP=be-latin1" > /mnt/etc/vconsole.conf
-echo "XKBLAYOUT=be" >> /mnt/etc/vconsole.conf
-echo "XKBOPTIONS=terminate:ctrl_alt_bksp" >> /mnt/etc/vconsole.conf
+{
+    echo "KEYMAP=be-latin1"
+    echo "XKBLAYOUT=be"
+    echo "XKBOPTIONS=terminate:ctrl_alt_bksp"
+} > /mnt/etc/vconsole.conf
 
 # set hostname
 echo "archserver-$randstring" > /mnt/etc/hostname
-echo "127.0.0.1 localhost archserver-$randstring" >> /mnt/etc/hosts
-echo "::1 localhost archserver-$randstring" >> /mnt/etc/hosts
+{
+    echo "127.0.0.1 localhost archserver-$randstring"
+    echo "::1 localhost archserver-$randstring"
+} >> /mnt/etc/hosts
 
 # just swap
 mkswap -L swap "/dev/${blockdev}${partitionextra}${swappart}"
 
-(
+{
     echo ""
     echo "/dev/${blockdev}${partitionextra}${swappart}  none  swap  defaults  0  0"
-) >> /mnt/etc/fstab
+} >> /mnt/etc/fstab
 
 # bootloader installation
 if [[ "$boottype" == "efi" ]]; then
